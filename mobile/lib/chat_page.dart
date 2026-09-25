@@ -136,8 +136,9 @@ class _ChatPageState extends State<ChatPage> {
         .where((p) => m.productIds.contains(p.id))
         .toList();
     return Column(
-      crossAxisAlignment:
-          isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+      crossAxisAlignment: isUser
+          ? CrossAxisAlignment.end
+          : CrossAxisAlignment.start,
       children: [
         Container(
           margin: const EdgeInsets.only(bottom: 8),
