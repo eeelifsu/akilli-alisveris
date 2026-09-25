@@ -365,6 +365,11 @@ class _HeaderState extends State<_Header> {
             children: [
               Row(
                 children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: Image.asset('assets/logo.png', height: 38),
+                  ),
+                  const SizedBox(width: 10),
                   const Expanded(
                     child: Text(
                       'Akıllı Alışveriş',
