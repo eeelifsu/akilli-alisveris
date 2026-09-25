@@ -13,7 +13,10 @@ public record ChatRequest(List<ChatMessage> Messages);
 
 public record ChatResponse(string Reply, List<Product> Products);
 
-public class ChatService(HttpClient http, IConfiguration config)
+/// <summary>Sağlayıcı geçici olarak yoğun (429/503) ve denemeler tükendi.</summary>
+public class ProviderBusyException(string message) : InvalidOperationException(message);
+
+public class ChatService(HttpClient http, IConfiguration config, ILogger<ChatService> logger)
 {
     private const int MaxToolRounds = 4;
 
@@ -27,9 +30,58 @@ public class ChatService(HttpClient http, IConfiguration config)
     public async Task<ChatResponse> AskAsync(List<ChatMessage> messages, AppDbContext db)
     {
         var categories = await db.Products.Select(p => p.Category).Distinct().OrderBy(c => c).ToListAsync();
-        return ProviderName == "gemini"
-            ? await AskGeminiAsync(messages, db, categories)
-            : await AskOllamaAsync(messages, db, categories);
+        if (ProviderName != "gemini")
+            return await AskOllamaAsync(messages, db, categories);
+
+        // Ana model yoğunsa (503/429) Google'ın listesindeki diğer Flash modellerini sırayla dene.
+        try
+        {
+            return await AskGeminiAsync(messages, db, categories, GeminiModel);
+        }
+        catch (ProviderBusyException busy)
+        {
+            var last = busy;
+            foreach (var model in await FallbackModelsAsync())
+            {
+                try
+                {
+                    logger.LogWarning("{Primary} yoğun, {Model} deneniyor", GeminiModel, model);
+                    return await AskGeminiAsync(messages, db, categories, model);
+                }
+                catch (ProviderBusyException e) { last = e; }
+            }
+            throw last;
+        }
+    }
+
+    private List<string>? _fallbacks;
+
+    /// <summary>Anahtarın erişebildiği, generateContent destekleyen Flash modelleri (yeniden eskiye).</summary>
+    private async Task<List<string>> FallbackModelsAsync()
+    {
+        if (_fallbacks != null) return _fallbacks;
+        try
+        {
+            using var request = new HttpRequestMessage(HttpMethod.Get,
+                "https://generativelanguage.googleapis.com/v1beta/models?pageSize=200");
+            request.Headers.Add("x-goog-api-key", GeminiKey);
+            using var response = await http.SendAsync(request);
+            using var doc = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+            _fallbacks = doc.RootElement.GetProperty("models").EnumerateArray()
+                .Where(m => m.GetProperty("supportedGenerationMethods").EnumerateArray().Any(x => x.GetString() == "generateContent"))
+                .Select(m => m.GetProperty("name").GetString()!.Replace("models/", ""))
+                .Where(n => n.Contains("flash") && n != GeminiModel &&
+                            !System.Text.RegularExpressions.Regex.IsMatch(n, "image|tts|live|audio|embed|exp|preview|thinking|latest"))
+                .OrderByDescending(n => n, StringComparer.Ordinal)
+                .Take(3)
+                .ToList();
+        }
+        catch (Exception e)
+        {
+            logger.LogWarning(e, "Model listesi alınamadı");
+            _fallbacks = [];
+        }
+        return _fallbacks;
     }
 
     private static string SystemPrompt(IEnumerable<string> categories) => $$"""
@@ -56,7 +108,7 @@ public class ChatService(HttpClient http, IConfiguration config)
 
     // ---------- Gemini (araç çağırma ile) ----------
 
-    private async Task<ChatResponse> AskGeminiAsync(List<ChatMessage> messages, AppDbContext db, List<string> categories)
+    private async Task<ChatResponse> AskGeminiAsync(List<ChatMessage> messages, AppDbContext db, List<string> categories, string model)
     {
         var contents = new JsonArray();
         foreach (var m in messages)
@@ -111,7 +163,7 @@ public class ChatService(HttpClient http, IConfiguration config)
             };
 
             using var request = new HttpRequestMessage(HttpMethod.Post,
-                $"https://generativelanguage.googleapis.com/v1beta/models/{GeminiModel}:generateContent")
+                $"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent")
             {
                 Content = Json(body),
             };
@@ -231,7 +283,9 @@ public class ChatService(HttpClient http, IConfiguration config)
                     return JsonDocument.Parse(raw);
 
                 var transient = (int)response.StatusCode is 429 or 503;
-                if (!transient || attempt == 3)
+                if (transient && attempt == 3)
+                    throw new ProviderBusyException($"{provider} yoğun ({(int)response.StatusCode}): {raw}");
+                if (!transient)
                     throw new InvalidOperationException($"{provider} hatası ({(int)response.StatusCode}): {raw}");
             }
             await Task.Delay(TimeSpan.FromSeconds(attempt * 2));
