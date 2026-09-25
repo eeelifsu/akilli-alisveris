@@ -48,22 +48,33 @@ Bu depo projenin **tamamını** içerir: web sitesi, iOS uygulaması ve ikisinin
 - **Mağaza politikaları:** Kargo, iade ve garanti sorularına anında cevap verir.
 - **Tek sunucu, iki istemci:** Web sitesi ve Flutter iOS uygulaması aynı API'yi kullanır.
 
+### Web sitesi
+
 <table>
   <tr>
-    <td width="68%"><img src="docs/screenshots/web-chat.png" alt="Web: asistan ve mağaza"></td>
-    <td width="32%"><img src="docs/screenshots/mobile-chat.png" alt="iOS: asistan"></td>
+    <td width="50%"><img src="docs/screenshots/web-chat.png" alt="Web: mağaza ve asistan paneli"></td>
+    <td width="50%"><img src="docs/screenshots/web-features.png" alt="Web: özellikler"></td>
   </tr>
   <tr>
-    <td align="center"><sub>Web: mağaza ve asistan paneli</sub></td>
-    <td align="center"><sub>iOS: asistan önerileri</sub></td>
+    <td align="center"><sub>Mağaza ve asistan paneli</sub></td>
+    <td align="center"><sub>Özellikler</sub></td>
+  </tr>
+</table>
+
+### iOS uygulaması
+
+<table>
+  <tr>
+    <td width="25%"><img src="docs/screenshots/mobile-home.png" alt="iOS: ana ekran"></td>
+    <td width="25%"><img src="docs/screenshots/mobile-chat.png" alt="iOS: asistan"></td>
+    <td width="25%"><img src="docs/screenshots/mobile-detail.png" alt="iOS: ürün detayı"></td>
+    <td width="25%"><img src="docs/screenshots/mobile-cart.png" alt="iOS: sepet"></td>
   </tr>
   <tr>
-    <td><img src="docs/screenshots/web-features.png" alt="Web: özellikler"></td>
-    <td><img src="docs/screenshots/mobile-home.png" alt="iOS: ana ekran"></td>
-  </tr>
-  <tr>
-    <td align="center"><sub>Web: özellikler</sub></td>
-    <td align="center"><sub>iOS: ana ekran ve katalog</sub></td>
+    <td align="center"><sub>Ana ekran ve katalog</sub></td>
+    <td align="center"><sub>Asistan önerileri</sub></td>
+    <td align="center"><sub>Ürün detayı</sub></td>
+    <td align="center"><sub>Sepet</sub></td>
   </tr>
 </table>
 
