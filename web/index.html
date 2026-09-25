@@ -5,19 +5,22 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Akıllı Alışveriş</title>
   <meta name="description" content="Ne aradığını anlat, yapay zekâ asistanı gerçek ürün kataloğundan sana en uygununu bulsun.">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27%23d9480f%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3E%3Cpath d=%27M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z%27/%3E%3Cpath d=%27M3 6h18%27/%3E%3Cpath d=%27M16 10a4 4 0 0 1-8 0%27/%3E%3C/svg%3E">
+  <meta name="theme-color" content="#f4f1ea">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 rx=%278%27 fill=%27%23171512%27/%3E%3Cpath d=%27M10 12h12l-1 11H11z%27 fill=%27none%27 stroke=%27%23c6ee5a%27 stroke-width=%272.2%27 stroke-linejoin=%27round%27/%3E%3Cpath d=%27M13 12a3 3 0 0 1 6 0%27 fill=%27none%27 stroke=%27%23c6ee5a%27 stroke-width=%272.2%27/%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" style="position:absolute" aria-hidden="true"><defs><symbol id="i-bag" viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></symbol><symbol id="i-sparkles" viewBox="0 0 24 24"><path d="M12 3l1.9 5.6 5.6 1.9-5.6 1.9L12 18l-1.9-5.6-5.6-1.9 5.6-1.9z"/><path d="M19 3v4M21 5h-4"/></symbol><symbol id="i-laptop" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M2 20h20"/></symbol><symbol id="i-phone" viewBox="0 0 24 24"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M11 18h2"/></symbol><symbol id="i-headphones" viewBox="0 0 24 24"><path d="M4 15v-3a8 8 0 0 1 16 0v3"/><rect x="3" y="14" width="4" height="7" rx="1.5"/><rect x="17" y="14" width="4" height="7" rx="1.5"/></symbol><symbol id="i-watch" viewBox="0 0 24 24"><rect x="7" y="6" width="10" height="12" rx="3"/><path d="M9 6l.6-3h4.8L15 6M9 18l.6 3h4.8l.6-3M12 10v2l1.5 1"/></symbol><symbol id="i-tablet" viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2.5"/><path d="M11 18h2"/></symbol><symbol id="i-plug" viewBox="0 0 24 24"><path d="M9 2v6M15 2v6M6 8h12v4a6 6 0 0 1-12 0z"/><path d="M12 18v4"/></symbol><symbol id="i-tv" viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="13" rx="2"/><path d="M8 2l4 4 4-4"/></symbol><symbol id="i-speaker" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="3"/><circle cx="12" cy="15" r="3.5"/><circle cx="12" cy="7" r="1"/></symbol><symbol id="i-camera" viewBox="0 0 24 24"><path d="M3 8a2 2 0 0 1 2-2h2l1.5-2h7L17 6h2a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><circle cx="12" cy="13" r="3.5"/></symbol><symbol id="i-gamepad" viewBox="0 0 24 24"><path d="M6 8h12a4 4 0 0 1 4 4.5l-.7 3.5a2.5 2.5 0 0 1-4.3 1L15.5 15h-7L7 17a2.5 2.5 0 0 1-4.3-1L2 12.5A4 4 0 0 1 6 8z"/><path d="M7 11v3M5.5 12.5h3M16 12h.01M18 13.5h.01"/></symbol><symbol id="i-receipt" viewBox="0 0 24 24"><path d="M5 2h14v20l-3-2-2 2-2-2-2 2-2-2-3 2z"/><path d="M9 8h6M9 12h6"/></symbol><symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol><symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/></symbol><symbol id="i-cart" viewBox="0 0 24 24"><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M2 3h3l2.7 12.4a1 1 0 0 0 1 .8h9.2a1 1 0 0 0 1-.8L21 8H6"/></symbol><symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></symbol><symbol id="i-alert" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v6M12 16.5h.01"/></symbol><symbol id="i-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8 12.5 3 3 5-6"/></symbol><symbol id="i-star" viewBox="0 0 24 24"><path d="M12 2.8l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.6l-5.9 3.2 1.2-6.5L2.5 9.7l6.6-.9z" fill="currentColor" stroke="none"/></symbol></defs></svg>
+  <svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" style="position:absolute" aria-hidden="true"><defs><symbol id="i-bag" viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></symbol><symbol id="i-sparkles" viewBox="0 0 24 24"><path d="M12 3l1.9 5.6 5.6 1.9-5.6 1.9L12 18l-1.9-5.6-5.6-1.9 5.6-1.9z"/><path d="M19 3v4M21 5h-4"/></symbol><symbol id="i-laptop" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M2 20h20"/></symbol><symbol id="i-phone" viewBox="0 0 24 24"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M11 18h2"/></symbol><symbol id="i-headphones" viewBox="0 0 24 24"><path d="M4 15v-3a8 8 0 0 1 16 0v3"/><rect x="3" y="14" width="4" height="7" rx="1.5"/><rect x="17" y="14" width="4" height="7" rx="1.5"/></symbol><symbol id="i-watch" viewBox="0 0 24 24"><rect x="7" y="6" width="10" height="12" rx="3"/><path d="M9 6l.6-3h4.8L15 6M9 18l.6 3h4.8l.6-3M12 10v2l1.5 1"/></symbol><symbol id="i-tablet" viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2.5"/><path d="M11 18h2"/></symbol><symbol id="i-plug" viewBox="0 0 24 24"><path d="M9 2v6M15 2v6M6 8h12v4a6 6 0 0 1-12 0z"/><path d="M12 18v4"/></symbol><symbol id="i-tv" viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="13" rx="2"/><path d="M8 2l4 4 4-4"/></symbol><symbol id="i-speaker" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="3"/><circle cx="12" cy="15" r="3.5"/><circle cx="12" cy="7" r="1"/></symbol><symbol id="i-camera" viewBox="0 0 24 24"><path d="M3 8a2 2 0 0 1 2-2h2l1.5-2h7L17 6h2a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><circle cx="12" cy="13" r="3.5"/></symbol><symbol id="i-gamepad" viewBox="0 0 24 24"><path d="M6 8h12a4 4 0 0 1 4 4.5l-.7 3.5a2.5 2.5 0 0 1-4.3 1L15.5 15h-7L7 17a2.5 2.5 0 0 1-4.3-1L2 12.5A4 4 0 0 1 6 8z"/><path d="M7 11v3M5.5 12.5h3M16 12h.01M18 13.5h.01"/></symbol><symbol id="i-receipt" viewBox="0 0 24 24"><path d="M5 2h14v20l-3-2-2 2-2-2-2 2-2-2-3 2z"/><path d="M9 8h6M9 12h6"/></symbol><symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol><symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/></symbol><symbol id="i-cart" viewBox="0 0 24 24"><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M2 3h3l2.7 12.4a1 1 0 0 0 1 .8h9.2a1 1 0 0 0 1-.8L21 8H6"/></symbol><symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></symbol><symbol id="i-alert" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v6M12 16.5h.01"/></symbol><symbol id="i-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8 12.5 3 3 5-6"/></symbol><symbol id="i-star" viewBox="0 0 24 24"><path d="M12 2.8l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.6l-5.9 3.2 1.2-6.5L2.5 9.7l6.6-.9z" fill="currentColor" stroke="none"/></symbol><symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol><symbol id="i-send" viewBox="0 0 24 24"><path d="M4 12 20 4l-6 16-3-7z"/><path d="m11 13 3-3"/></symbol><symbol id="i-db" viewBox="0 0 24 24"><ellipse cx="12" cy="5.5" rx="7.5" ry="3"/><path d="M4.5 5.5v6c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3v-6"/><path d="M4.5 11.5v6c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3v-6"/></symbol><symbol id="i-grid" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/></symbol><symbol id="i-devices" viewBox="0 0 24 24"><rect x="2" y="4" width="14" height="10" rx="1.5"/><path d="M1 18h16"/><rect x="17" y="8" width="6" height="12" rx="1.5"/></symbol><symbol id="i-chat" viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/><path d="M8 9.5h8M8 12.5h5"/></symbol><symbol id="i-truck" viewBox="0 0 24 24"><path d="M2 6h11v10H2zM13 9h4l3 3.5V16h-7"/><circle cx="6" cy="17.5" r="1.8"/><circle cx="16.5" cy="17.5" r="1.8"/></symbol><symbol id="i-return" viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></symbol><symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 4.5 6v5.5c0 4.6 3.1 8.1 7.5 9.5 4.4-1.4 7.5-4.9 7.5-9.5V6z"/><path d="m9 12 2 2 4-4"/></symbol></defs></svg>
+
   <!-- Menü -->
-  <header class="nav-wrap">
-    <nav class="nav" aria-label="Ana menü">
+  <header class="topbar">
+    <nav class="container nav" aria-label="Ana menü">
       <a href="#" class="brand" aria-label="Akıllı Alışveriş">
-        <span class="brand-mark"><svg class="ic" aria-hidden="true"><use href="#i-bag"/></svg></span><span>Akıllı<b>Alışveriş</b></span>
+        <span class="brand-mark"><svg class="ic" aria-hidden="true"><use href="#i-bag"/></svg></span>
+        <span class="brand-name">Akıllı <em>Alışveriş</em></span>
       </a>
       <div class="nav-links">
         <a href="#demo">Asistan</a>
@@ -26,10 +29,10 @@
       </div>
       <span class="spacer"></span>
       <button class="icon-btn" id="cart-btn" aria-label="Sepeti aç">
-        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6h15l-1.5 9h-12z"/><path d="M6 6 5 3H2"/><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/></svg>
+        <svg class="ic" aria-hidden="true"><use href="#i-cart"/></svg>
         <span class="badge" id="cart-count" hidden>0</span>
       </button>
-      <button class="btn mint sm" id="nav-chat">Asistanı dene</button>
+      <button class="btn accent sm" id="nav-chat"><svg class="ic" aria-hidden="true"><use href="#i-sparkles"/></svg>Asistanı dene</button>
     </nav>
   </header>
 
@@ -37,171 +40,176 @@
   <section class="hero">
     <div class="container hero-inner">
       <div class="hero-copy">
+        <p class="eyebrow"><span class="dot"></span>Yapay zekâ destekli alışveriş asistanı</p>
         <h1>
-          <span>Doğru</span>
-          <span class="rot-line"><span class="rot" id="rot">laptopu</span></span>
-          <span>birlikte bulalım.</span>
+          Doğru <span class="rot-line"><span class="rot" id="rot">laptopu</span></span><br>
+          birlikte bulalım.
         </h1>
-        <p class="lead">Ne aradığını ve bütçeni anlat. Yapay zekâ asistanımız gerçek ürün kataloğunda arasın, stoktaki en uygun seçenekleri önüne getirsin.</p>
+        <p class="lead">Ne aradığını ve bütçeni kendi cümlelerinle anlat. Asistan gerçek kataloğu tarar, stoktaki en uygun seçenekleri önüne getirir.</p>
 
         <form class="ask" id="ask-form">
-          <input id="ask-input" placeholder="Örneğin: 50.000 TL altında yazılım geliştirme için laptop…" autocomplete="off" maxlength="300" aria-label="Ne arıyorsun?">
-          <button class="btn primary" type="submit">Sor <span aria-hidden="true">→</span></button>
+          <svg class="ic ask-ic" aria-hidden="true"><use href="#i-sparkles"/></svg>
+          <input id="ask-input" placeholder="Örn. 50.000 TL altı, yazılım için laptop" autocomplete="off" maxlength="300" aria-label="Ne arıyorsun?">
+          <button class="btn primary" type="submit">Sor <svg class="ic" aria-hidden="true"><use href="#i-arrow"/></svg></button>
         </form>
         <div class="prompts" id="hero-prompts"></div>
 
         <ul class="trust" aria-label="Öne çıkanlar">
-          <li><b id="fact-products">–</b> gerçek ürün</li>
-          <li><b id="fact-cats">–</b> kategori</li>
-          <li>Web + iOS</li>
+          <li><svg class="ic" aria-hidden="true"><use href="#i-db"/></svg><b id="fact-products">–</b> gerçek ürün</li>
+          <li><svg class="ic" aria-hidden="true"><use href="#i-grid"/></svg><b id="fact-cats">–</b> kategori</li>
+          <li><svg class="ic" aria-hidden="true"><use href="#i-devices"/></svg>Web ve iOS</li>
         </ul>
       </div>
 
-      <div class="hero-visual" aria-hidden="false">
-        <div class="blob"></div>
-        <div class="phone big">
-          <div class="phone-notch"></div>
-          <div class="phone-head pink">
+      <div class="hero-visual">
+        <div class="float f1"><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg>Stokta</div>
+        <div class="float f2"><svg class="ic" aria-hidden="true"><use href="#i-star"/></svg>Puana göre sıralandı</div>
+        <div class="window">
+          <div class="window-head">
             <span class="avatar"><svg class="ic" aria-hidden="true"><use href="#i-sparkles"/></svg></span>
-            <div><b>Akıllı Asistan</b><small>çevrimiçi</small></div>
+            <div><b>Akıllı Asistan</b><small><span class="live"></span>çevrimiçi</small></div>
           </div>
-          <div class="phone-body">
+          <div class="window-body">
             <div class="msg user d1">Öğrenciyim, 40 bin TL altı bir laptop arıyorum.</div>
-            <div class="msg bot d2">Bütçene uyan, puanı yüksek seçenekler buldum</div>
+            <div class="msg bot d2">Bütçene uyan, puanı yüksek seçenekler buldum:</div>
             <div class="mini-cards d3" id="hero-cards"></div>
           </div>
-          <div class="phone-input">Mesajını yaz…</div>
+          <div class="window-input">Mesajını yaz… <span class="fake-send"><svg class="ic" aria-hidden="true"><use href="#i-send"/></svg></span></div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Asistan demoları -->
-  <section class="container demo" id="demo">
-    <div class="section-head">
-      <h2>Asistan iş başında</h2>
-      <p>Ürünler gerçek kataloğumuzdan gelir. Konuşmalar örnektir.</p>
+  <!-- Kategori şeridi -->
+  <div class="ticker" aria-hidden="true">
+    <div class="ticker-track">
+      <span><svg class="ic"><use href="#i-laptop"/></svg>Laptop</span><span><svg class="ic"><use href="#i-phone"/></svg>Telefon</span><span><svg class="ic"><use href="#i-headphones"/></svg>Kulaklık</span><span><svg class="ic"><use href="#i-watch"/></svg>Saat</span><span><svg class="ic"><use href="#i-tablet"/></svg>Tablet</span><span><svg class="ic"><use href="#i-tv"/></svg>Televizyon</span><span><svg class="ic"><use href="#i-speaker"/></svg>Hoparlör</span><span><svg class="ic"><use href="#i-camera"/></svg>Kamera</span><span><svg class="ic"><use href="#i-gamepad"/></svg>Oyun Konsolu</span><span><svg class="ic"><use href="#i-plug"/></svg>Aksesuar</span>
+      <span><svg class="ic"><use href="#i-laptop"/></svg>Laptop</span><span><svg class="ic"><use href="#i-phone"/></svg>Telefon</span><span><svg class="ic"><use href="#i-headphones"/></svg>Kulaklık</span><span><svg class="ic"><use href="#i-watch"/></svg>Saat</span><span><svg class="ic"><use href="#i-tablet"/></svg>Tablet</span><span><svg class="ic"><use href="#i-tv"/></svg>Televizyon</span><span><svg class="ic"><use href="#i-speaker"/></svg>Hoparlör</span><span><svg class="ic"><use href="#i-camera"/></svg>Kamera</span><span><svg class="ic"><use href="#i-gamepad"/></svg>Oyun Konsolu</span><span><svg class="ic"><use href="#i-plug"/></svg>Aksesuar</span>
     </div>
-    <div class="phones" id="phones">
-      <div class="phone">
-        <div class="phone-notch"></div>
-        <div class="phone-head sun"><span class="avatar"><svg class="ic" aria-hidden="true"><use href="#i-laptop"/></svg></span><div><b>Laptop</b><small>bütçeye göre</small></div></div>
-        <div class="phone-body">
+  </div>
+
+  <!-- Asistan demoları -->
+  <section class="container section" id="demo">
+    <div class="section-head">
+      <p class="kicker">01 · Asistan iş başında</p>
+      <h2>Sen sor, o <em>katalogdan</em> bulsun.</h2>
+      <p>Ürünler gerçek kataloğumuzdan canlı gelir. Konuşmalar örnektir.</p>
+    </div>
+    <div class="convos">
+      <article class="convo">
+        <header><span class="convo-ic"><svg class="ic" aria-hidden="true"><use href="#i-laptop"/></svg></span><div><b>Laptop</b><small>bütçeye göre</small></div></header>
+        <div class="convo-body">
           <div class="msg user">40 bin TL altı, hafif bir laptop var mı?</div>
           <div class="msg bot">İşte puanı en yüksek olanlar:</div>
           <div class="mini-cards" data-scenario="laptop"></div>
         </div>
-        <div class="phone-input">Mesajını yaz…</div>
-      </div>
-      <div class="phone">
-        <div class="phone-notch"></div>
-        <div class="phone-head sky"><span class="avatar"><svg class="ic" aria-hidden="true"><use href="#i-headphones"/></svg></span><div><b>Kulaklık</b><small>ihtiyaca göre</small></div></div>
-        <div class="phone-body">
+      </article>
+      <article class="convo">
+        <header><span class="convo-ic"><svg class="ic" aria-hidden="true"><use href="#i-headphones"/></svg></span><div><b>Kulaklık</b><small>ihtiyaca göre</small></div></header>
+        <div class="convo-body">
           <div class="msg user">Kablosuz bir kulaklık arıyorum.</div>
           <div class="msg bot">Şunlar stokta ve iyi puan almış:</div>
           <div class="mini-cards" data-scenario="headphone"></div>
         </div>
-        <div class="phone-input">Mesajını yaz…</div>
-      </div>
-      <div class="phone">
-        <div class="phone-notch"></div>
-        <div class="phone-head mintg"><span class="avatar"><svg class="ic" aria-hidden="true"><use href="#i-receipt"/></svg></span><div><b>Politikalar</b><small>kargo &amp; iade</small></div></div>
-        <div class="phone-body">
-          <div class="msg user">İade ve kargo nasıl işliyor?</div>
-          <div class="msg bot">Kargo 1-3 iş gününde gelir, 500 ₺ üzeri ücretsiz. Teslimden sonra 14 gün içinde ücretsiz iade edebilirsin. Tüm ürünlerde 2 yıl garanti var.<br><small>(demo mağaza politikası)</small></div>
-        </div>
-        <div class="phone-input">Mesajını yaz…</div>
-      </div>
-      <div class="phone">
-        <div class="phone-notch"></div>
-        <div class="phone-head violet"><span class="avatar"><svg class="ic" aria-hidden="true"><use href="#i-phone"/></svg></span><div><b>Telefon</b><small>fiyata göre</small></div></div>
-        <div class="phone-body">
+      </article>
+      <article class="convo">
+        <header><span class="convo-ic"><svg class="ic" aria-hidden="true"><use href="#i-phone"/></svg></span><div><b>Telefon</b><small>fiyata göre</small></div></header>
+        <div class="convo-body">
           <div class="msg user">10 bin TL altı bir telefon önerir misin?</div>
           <div class="msg bot">Bütçene uygun, stokta olan telefonlar:</div>
           <div class="mini-cards" data-scenario="phone"></div>
         </div>
-        <div class="phone-input">Mesajını yaz…</div>
-      </div>
+      </article>
+      <article class="convo">
+        <header><span class="convo-ic"><svg class="ic" aria-hidden="true"><use href="#i-receipt"/></svg></span><div><b>Politikalar</b><small>kargo ve iade</small></div></header>
+        <div class="convo-body">
+          <div class="msg user">İade ve kargo nasıl işliyor?</div>
+          <div class="msg bot">Kargo 1-3 iş gününde gelir, 500 ₺ üzeri ücretsiz. Teslimden sonra 14 gün içinde ücretsiz iade edebilirsin. Tüm ürünlerde 2 yıl garanti var.</div>
+          <ul class="policy">
+            <li><svg class="ic" aria-hidden="true"><use href="#i-truck"/></svg><span><b>1-3 gün</b>kargo</span></li>
+            <li><svg class="ic" aria-hidden="true"><use href="#i-return"/></svg><span><b>14 gün</b>ücretsiz iade</span></li>
+            <li><svg class="ic" aria-hidden="true"><use href="#i-shield"/></svg><span><b>2 yıl</b>garanti</span></li>
+          </ul>
+          <small class="note">Demo mağaza politikası</small>
+        </div>
+      </article>
     </div>
   </section>
 
   <!-- Rakamlar -->
-  <section class="container">
-    <div class="stats-box">
-      <h2>Rakamlarla Akıllı Alışveriş</h2>
+  <section class="stats-band">
+    <div class="container">
+      <p class="kicker light">02 · Rakamlarla</p>
       <div class="stats">
-        <div><b class="count" id="stat-products" data-to="0">0</b><span>gerçek ürün<br>katalogda</span></div>
+        <div><b class="count" id="stat-products" data-to="0">0</b><span>gerçek ürün katalogda</span></div>
         <div><b class="count" id="stat-cats" data-to="0">0</b><span>ürün kategorisi</span></div>
         <div><b class="count" id="stat-brands" data-to="0">0</b><span>farklı marka</span></div>
-        <div><b class="count" data-to="2">0</b><span>platform: web ve iOS,<br>tek sunucu</span></div>
+        <div><b class="count" data-to="2">0</b><span>platform, tek sunucu</span></div>
       </div>
-      <p class="fine">* Rakamlar mağaza kataloğundan canlı hesaplanır.</p>
+      <p class="fine">Rakamlar mağaza kataloğundan canlı hesaplanır.</p>
     </div>
   </section>
 
   <!-- Özellikler -->
-  <section class="container features" id="features">
-    <div class="fgrid">
-      <article class="fcard sun">
+  <section class="container section" id="features">
+    <div class="section-head">
+      <p class="kicker">03 · Neler yapıyor</p>
+      <h2>Filtre değil, <em>sohbet.</em></h2>
+    </div>
+    <div class="bento">
+      <article class="tile wide">
+        <span class="tile-ic"><svg class="ic" aria-hidden="true"><use href="#i-chat"/></svg></span>
         <h3>Doğal dilde arama</h3>
-        <p>Filtrelerle uğraşma. İhtiyacını cümleyle anlat, bütçeni ve kullanım amacını asistan anlasın.</p>
+        <p>Filtrelerle uğraşma. İhtiyacını cümleyle anlat; bütçeni, markanı ve kullanım amacını asistan anlasın.</p>
         <div class="chat-demo">
           <div class="bubble right">Oyun ve yazılım için laptop, 50 bin TL civarı.</div>
-          <div class="bubble left">Tamam! Güçlü işlemcili, yeterli RAM'li seçeneklere bakıyorum.</div>
+          <div class="bubble left">Tamam. Güçlü işlemcili, yeterli RAM'li seçeneklere bakıyorum.</div>
         </div>
       </article>
-      <article class="fcard lav">
+      <article class="tile accent">
+        <span class="tile-ic"><svg class="ic" aria-hidden="true"><use href="#i-db"/></svg></span>
         <h3>Gerçek ürünler, uydurma yok</h3>
-        <p>Asistan yalnızca veritabanındaki ürünleri önerir. Fiyat, puan ve özellik bilgisi katalogdan gelir.</p>
-        <div class="chat-demo">
-          <div class="bubble right">Bu telefonun kaç GB RAM'i var?</div>
-          <div class="bubble left">Katalogdaki bilgiye göre 6 GB RAM, 64 GB depolama.</div>
-        </div>
+        <p>Asistan yalnızca veritabanındaki ürünleri önerir. Fiyat, puan ve özellikler katalogdan gelir.</p>
       </article>
-      <article class="fcard mint">
+      <article class="tile">
+        <span class="tile-ic"><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg></span>
         <h3>Stok ve fiyat kontrolü</h3>
         <p>Tükenen ürünler önerilmez. Fiyatlar TL cinsinden, görsel ve puanla birlikte gösterilir.</p>
-        <div class="chat-demo">
-          <div class="bubble right">10 bin TL altı bir telefon.</div>
-          <div class="bubble left">Stokta olan, bütçene uygun telefonları listeledim.</div>
-        </div>
       </article>
-      <article class="fcard sun">
+      <article class="tile">
+        <span class="tile-ic"><svg class="ic" aria-hidden="true"><use href="#i-receipt"/></svg></span>
         <h3>Mağaza politikaları</h3>
-        <p>Kargo, iade ve garanti sorularını asistan anında cevaplar. Politikalar demo mağaza için tanımlıdır.</p>
-        <div class="chat-demo">
-          <div class="bubble right">İade süresi kaç gün?</div>
-          <div class="bubble left">Teslimden sonra 14 gün içinde ücretsiz iade edebilirsin.</div>
-        </div>
+        <p>Kargo, iade ve garanti sorularını asistan anında cevaplar.</p>
       </article>
-      <article class="fcard lav">
+      <article class="tile">
+        <span class="tile-ic"><svg class="ic" aria-hidden="true"><use href="#i-cart"/></svg></span>
         <h3>Sohbetten sepete</h3>
         <p>Önerilen ürünü sohbetten çıkmadan sepete ekle, detayına bak.</p>
-        <div class="chat-demo">
-          <div class="bubble left">Şu kulaklığı öneririm</div>
-          <div class="bubble right">Güzel, sepete ekle.</div>
-        </div>
       </article>
-      <article class="fcard mint">
-        <h3>Web ve iOS uygulaması</h3>
-        <p>Aynı asistan hem bu sitede hem iPhone uygulamasında, tek bir sunucudan çalışır.</p>
-        <div class="chat-demo">
-          <div class="bubble left">Aynı katalog, aynı asistan: hem web hem iPhone.</div>
+      <article class="tile ink full">
+        <div>
+          <span class="tile-ic"><svg class="ic" aria-hidden="true"><use href="#i-devices"/></svg></span>
+          <h3>Web ve iOS, aynı asistan</h3>
+          <p>Hem bu sitede hem iPhone uygulamasında, tek bir sunucudan çalışır.</p>
         </div>
+        <button class="btn accent" id="features-chat" type="button">Şimdi dene <svg class="ic" aria-hidden="true"><use href="#i-arrow"/></svg></button>
       </article>
     </div>
   </section>
 
   <!-- Mağaza -->
-  <div class="container store-head" id="store"><h2>Mağaza</h2><p>Kataloğumuzdaki ürünlere göz at, ara ve filtrele.</p></div>
+  <div class="container section-head store-head" id="store">
+    <p class="kicker">04 · Mağaza</p>
+    <h2>Kataloğa <em>göz at.</em></h2>
+    <p>Ara, kategoriye göre süz, fiyata göre sırala.</p>
+  </div>
 
   <main class="container" id="products">
-    <label class="search" aria-label="Ürün ara">
-      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-      <input id="search" type="search" placeholder="Ürün, marka veya özellik ara…" autocomplete="off">
-    </label>
-    <div class="toolbar">
-      <div class="chips" id="chips" role="tablist" aria-label="Kategoriler"></div>
+    <div class="store-bar">
+      <label class="search" aria-label="Ürün ara">
+        <svg class="ic" aria-hidden="true"><use href="#i-search"/></svg>
+        <input id="search" type="search" placeholder="Ürün, marka veya özellik ara…" autocomplete="off">
+      </label>
       <div class="selects">
         <select id="max-price" aria-label="Azami fiyat">
           <option value="">Tüm fiyatlar</option>
@@ -218,6 +226,7 @@
         </select>
       </div>
     </div>
+    <div class="chips" id="chips" role="tablist" aria-label="Kategoriler"></div>
     <p class="result-info" id="result-info" aria-live="polite"></p>
     <div class="grid" id="grid"></div>
     <div class="state" id="state"></div>
@@ -226,22 +235,27 @@
 
   <!-- Alt bilgi -->
   <footer class="footer">
-    <div class="container footer-grid">
-      <div>
-        <a href="#" class="brand light"><span class="brand-mark"><svg class="ic" aria-hidden="true"><use href="#i-bag"/></svg></span><span>Akıllı<b>Alışveriş</b></span></a>
-        <p>Yapay zekâ destekli, gerçek ürün verisiyle çalışan alışveriş asistanı.</p>
-        <button class="btn primary sm" id="footer-chat">Asistanı dene</button>
+    <div class="container">
+      <div class="footer-cta">
+        <h2>Aradığını <em>anlatman</em> yeter.</h2>
+        <button class="btn accent" id="footer-chat">Asistanı dene <svg class="ic" aria-hidden="true"><use href="#i-arrow"/></svg></button>
       </div>
-      <div>
-        <h4>Keşfet</h4>
-        <a href="#demo">Asistan</a><a href="#features">Özellikler</a><a href="#products">Mağaza</a>
+      <div class="footer-grid">
+        <div>
+          <a href="#" class="brand light"><span class="brand-mark"><svg class="ic" aria-hidden="true"><use href="#i-bag"/></svg></span><span class="brand-name">Akıllı <em>Alışveriş</em></span></a>
+          <p>Yapay zekâ destekli, gerçek ürün verisiyle çalışan alışveriş asistanı.</p>
+        </div>
+        <div>
+          <h4>Keşfet</h4>
+          <a href="#demo">Asistan</a><a href="#features">Özellikler</a><a href="#products">Mağaza</a>
+        </div>
+        <div>
+          <h4>Veri hakkında</h4>
+          <p class="small">Ürünler Kaggle'daki Gadgets360 veri setinden alınmıştır (2021, Hindistan pazarı). Fiyatlar ₹'dan ₺'ye çevrilmiştir; stok ve politikalar demo amaçlıdır.</p>
+        </div>
       </div>
-      <div>
-        <h4>Veri hakkında</h4>
-        <p class="small">Ürünler Kaggle'daki Gadgets360 veri setinden alınmıştır (2021, Hindistan pazarı). Fiyatlar ₹'dan ₺'ye çevrilmiş, stok ve politikalar demo amaçlıdır.</p>
-      </div>
+      <div class="copy">© <span id="year"></span> Akıllı Alışveriş · Bu bir demo projesidir.</div>
     </div>
-    <div class="container copy">© <span id="year"></span> Akıllı Alışveriş · Bu bir demo projesidir.</div>
   </footer>
 
   <!-- Ürün detayı -->
@@ -272,20 +286,19 @@
 
   <!-- Sohbet -->
   <button class="chat-fab" id="chat-fab" aria-label="Asistanı aç">
-    <span><svg class="ic" aria-hidden="true"><use href="#i-sparkles"/></svg></span><b>Asistan</b>
+    <svg class="ic" aria-hidden="true"><use href="#i-sparkles"/></svg><b>Asistan</b>
   </button>
   <section class="chat" id="chat" aria-label="Alışveriş asistanı" hidden>
     <div class="chat-head">
-      <div><strong>Alışveriş Asistanı</strong><small>Sana uygun ürünü bulalım</small></div>
+      <span class="avatar"><svg class="ic" aria-hidden="true"><use href="#i-sparkles"/></svg></span>
+      <div><strong>Alışveriş Asistanı</strong><small><span class="live"></span>Sana uygun ürünü bulalım</small></div>
       <button class="close static" id="chat-close" aria-label="Sohbeti kapat"><svg class="ic" aria-hidden="true"><use href="#i-x"/></svg></button>
     </div>
     <div class="chat-body" id="chat-body"></div>
     <div class="suggestions" id="suggestions"></div>
     <form class="chat-form" id="chat-form">
       <input id="chat-input" placeholder="Mesajını yaz…" autocomplete="off" maxlength="500">
-      <button class="send" aria-label="Gönder">
-        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M3 20.5 21 12 3 3.5v6.6l11 1.9-11 1.9z"/></svg>
-      </button>
+      <button class="send" aria-label="Gönder"><svg class="ic" aria-hidden="true"><use href="#i-send"/></svg></button>
     </form>
   </section>
 

@@ -493,6 +493,7 @@ $('m-add').addEventListener('click', () => { if (modalProduct) addToCart(modalPr
 $('chat-fab').addEventListener('click', openChat);
 $('nav-chat').addEventListener('click', openChat);
 $('footer-chat').addEventListener('click', openChat);
+$('features-chat').addEventListener('click', openChat);
 $('ask-form').addEventListener('submit', (e) => {
   e.preventDefault();
   const text = $('ask-input').value.trim();
