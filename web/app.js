@@ -1,15 +1,20 @@
 'use strict';
 
 const API = location.protocol === 'file:' ? 'http://localhost:5065' : '';
-const EMOJI = { Laptop: '💻', Telefon: '📱', Kulaklık: '🎧', Saat: '⌚', Tablet: '📲' };
+const EMOJI = { Laptop: '💻', Telefon: '📱', Kulaklık: '🎧', Saat: '⌚', Tablet: '📲', Aksesuar: '🔌' };
+const PAGE_SIZE = 24;
 const $ = (id) => document.getElementById(id);
 
 const state = {
-  products: [],
+  products: [], // ekrandaki (yüklenmiş) ürünler
+  total: 0,
+  page: 1,
+  facets: { categories: [], total: 0 },
   category: null,
   query: '',
-  sort: 'default',
-  cart: load('cart', {}), // { [productId]: qty }
+  sort: '',
+  maxPrice: '',
+  cart: loadCart(), // { [productId]: { product, qty } }
   chat: [], // { role, content }
   chatBusy: false,
 };
@@ -21,10 +26,30 @@ function save(key, value) {
   try { localStorage.setItem(key, JSON.stringify(value)); } catch { /* özel sekme vb. */ }
 }
 
+// Eski biçimden (id -> adet) kalan kayıtları at.
+function loadCart() {
+  const raw = load('cart', {});
+  return Object.fromEntries(Object.entries(raw).filter(([, l]) => l && typeof l === 'object' && l.product));
+}
+
 const tl = (n) => new Intl.NumberFormat('tr-TR').format(n) + ' ₺';
 const emojiOf = (p) => EMOJI[p.category] ?? '🛍️';
 const gradOf = (p) => (EMOJI[p.category] ? `g-${p.category}` : 'g-default');
-const byId = (id) => state.products.find((p) => p.id === id);
+const known = new Map(); // id -> ürün (listeden, sohbetten, sepetten görülenler)
+const remember = (list) => list.forEach((p) => known.set(p.id, p));
+const byId = (id) => known.get(id);
+
+function visual(p, cls) {
+  const box = el('div', { class: cls });
+  box.append(el('span', { class: 'emoji' }, emojiOf(p)));
+  if (p.imageUrl) {
+    const img = el('img', { src: p.imageUrl, alt: p.name, loading: 'lazy', referrerpolicy: 'no-referrer' });
+    img.addEventListener('load', () => box.querySelector('.emoji')?.remove());
+    img.addEventListener('error', () => img.remove());
+    box.append(img);
+  }
+  return box;
+}
 
 function el(tag, props = {}, ...children) {
   const node = document.createElement(tag);
@@ -47,50 +72,75 @@ function toast(msg) {
 }
 
 /* ---------- Ürünler ---------- */
-async function fetchProducts() {
-  const skeleton = Array.from({ length: 6 }, () => el('div', { class: 'skeleton' }));
-  $('grid').replaceChildren(...skeleton);
-  $('state').replaceChildren();
+let reqId = 0;
+
+async function getJson(path) {
+  const res = await fetch(`${API}${path}`);
+  if (!res.ok) throw new Error(`Sunucu hatası (${res.status})`);
+  return res.json();
+}
+
+async function loadFacets() {
+  state.facets = await getJson('/api/facets');
+  $('fact-products').textContent = state.facets.total;
+  $('fact-cats').textContent = state.facets.categories.length;
+  renderChips();
+}
+
+function listUrl(page) {
+  const q = new URLSearchParams({ page, pageSize: PAGE_SIZE });
+  if (state.query.trim()) q.set('q', state.query.trim());
+  if (state.category) q.set('category', state.category);
+  if (state.sort) q.set('sort', state.sort);
+  if (state.maxPrice) q.set('maxPrice', state.maxPrice);
+  return `/api/products?${q}`;
+}
+
+async function fetchProducts({ append = false } = {}) {
+  const id = ++reqId;
+  if (!append) {
+    $('grid').replaceChildren(...Array.from({ length: 6 }, () => el('div', { class: 'skeleton' })));
+    $('state').replaceChildren();
+    $('more').hidden = true;
+  }
   try {
-    const res = await fetch(`${API}/api/products`);
-    if (!res.ok) throw new Error(`Sunucu hatası (${res.status})`);
-    state.products = await res.json();
-    $('fact-products').textContent = state.products.length;
-    $('fact-cats').textContent = new Set(state.products.map((p) => p.category)).size;
-    renderChips();
-    renderGrid();
+    const data = await getJson(listUrl(append ? state.page + 1 : 1));
+    if (id !== reqId) return; // daha yeni bir istek var
+    state.page = data.page;
+    state.total = data.total;
+    state.products = append ? [...state.products, ...data.items] : data.items;
+    remember(data.items);
+    renderGrid(append ? data.items.length : 0);
     renderCart();
   } catch (e) {
+    if (id !== reqId) return;
     $('grid').replaceChildren();
     $('result-info').textContent = '';
+    $('more').hidden = true;
     $('state').replaceChildren(
       el('div', {}, '😕 Ürünler yüklenemedi.'),
       el('div', { class: 'small' }, String(e.message || e)),
-      el('button', { class: 'btn ghost retry', onclick: fetchProducts }, 'Tekrar dene'),
+      el('button', { class: 'btn ghost retry', onclick: () => fetchProducts() }, 'Tekrar dene'),
     );
   }
 }
 
-function visibleProducts() {
-  const q = state.query.trim().toLocaleLowerCase('tr');
-  let list = state.products.filter((p) => {
-    if (state.category && p.category !== state.category) return false;
-    if (!q) return true;
-    return [p.name, p.brand, p.category, p.description].some((s) => s.toLocaleLowerCase('tr').includes(q));
-  });
-  if (state.sort === 'asc') list = [...list].sort((a, b) => a.price - b.price);
-  if (state.sort === 'desc') list = [...list].sort((a, b) => b.price - a.price);
-  return list;
+let searchTimer;
+function refetchSoon() {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => fetchProducts(), 250);
 }
 
 function renderChips() {
-  const cats = [...new Set(state.products.map((p) => p.category))].sort((a, b) => a.localeCompare(b, 'tr'));
   const make = (label, value) =>
     el('button', {
       class: 'chip', role: 'tab', 'aria-selected': String(state.category === value),
-      onclick: () => { state.category = value; renderChips(); renderGrid(); },
+      onclick: () => { state.category = value; renderChips(); fetchProducts(); },
     }, label);
-  $('chips').replaceChildren(make('Tümü', null), ...cats.map((c) => make(`${EMOJI[c] ?? '🛍️'} ${c}`, c)));
+  $('chips').replaceChildren(
+    make('Tümü', null),
+    ...state.facets.categories.map((c) => make(`${EMOJI[c.name] ?? '🛍️'} ${c.name} (${c.count})`, c.name)),
+  );
 }
 
 function stockTag(p) {
@@ -99,16 +149,25 @@ function stockTag(p) {
   return el('span', { class: 'stock-tag' }, 'Stokta');
 }
 
-function renderGrid() {
-  const list = visibleProducts();
-  $('result-info').textContent = `${list.length} ürün bulundu`;
+function ratingEl(p) {
+  if (!p.rating) return null;
+  return el('span', { class: 'rating' }, el('b', {}, '★'), p.rating.toFixed(1), p.ratingCount ? ` (${p.ratingCount})` : '');
+}
+
+function renderGrid(appendedCount = 0) {
+  const list = state.products;
+  $('result-info').textContent = `${state.total} ürün bulundu`;
   $('state').replaceChildren(list.length ? '' : el('div', {}, '🔍 Aramana uygun ürün bulunamadı.'));
-  $('grid').replaceChildren(...list.map((p, i) => {
-    const card = el('article', { class: 'card', style: `animation-delay:${Math.min(i, 12) * 40}ms`, tabindex: '0' },
-      el('div', { class: `visual ${gradOf(p)}` }, el('span', { class: 'emoji' }, emojiOf(p)), stockTag(p)),
+  $('more').hidden = list.length >= state.total;
+  const cards = list.map((p, i) => {
+    const vis = visual(p, `visual ${gradOf(p)}`);
+    vis.append(stockTag(p));
+    const card = el('article', { class: 'card', tabindex: '0' },
+      vis,
       el('div', { class: 'card-body' },
         el('div', { class: 'meta' }, `${p.brand} · ${p.category}`),
         el('h3', {}, p.name),
+        ratingEl(p),
         el('p', { class: 'desc' }, p.description),
         el('div', { class: 'card-foot' },
           el('span', { class: 'price' }, tl(p.price)),
@@ -122,7 +181,8 @@ function renderGrid() {
     card.addEventListener('click', () => openModal(p.id));
     card.addEventListener('keydown', (e) => { if (e.key === 'Enter') openModal(p.id); });
     return card;
-  }));
+  });
+  $('grid').replaceChildren(...cards);
 }
 
 /* ---------- Ürün detayı ---------- */
@@ -131,11 +191,11 @@ function openModal(id) {
   const p = byId(id);
   if (!p) return;
   modalProduct = p;
-  const v = $('m-visual');
-  v.className = `m-visual ${gradOf(p)}`;
-  v.textContent = emojiOf(p);
+  const v = visual(p, `m-visual ${gradOf(p)}`);
+  v.id = 'm-visual';
+  $('m-visual').replaceWith(v);
   $('m-name').textContent = p.name;
-  $('m-desc').textContent = p.description;
+  $('m-desc').textContent = [p.description, p.specs].filter(Boolean).join('\n\n');
   $('m-price').textContent = tl(p.price);
   $('m-tags').replaceChildren(
     el('span', { class: 'tag' }, p.brand),
@@ -157,16 +217,17 @@ function closeModal() {
 function addToCart(id, qty = 1) {
   const p = byId(id);
   if (!p || p.stock <= 0) return;
-  const next = Math.min((state.cart[id] || 0) + qty, p.stock);
-  if (next === state.cart[id]) return toast(`En fazla ${p.stock} adet ekleyebilirsin`);
-  state.cart[id] = next;
+  const cur = state.cart[id]?.qty || 0;
+  const next = Math.min(cur + qty, p.stock);
+  if (next === cur) return toast(`En fazla ${p.stock} adet ekleyebilirsin`);
+  state.cart[id] = { product: p, qty: next };
   persistCart();
   toast(`${p.name} sepete eklendi`);
 }
 function setQty(id, qty) {
-  const p = byId(id);
-  if (!p || qty <= 0) delete state.cart[id];
-  else state.cart[id] = Math.min(qty, p.stock);
+  const line = state.cart[id];
+  if (!line || qty <= 0) delete state.cart[id];
+  else line.qty = Math.min(qty, line.product.stock);
   persistCart();
 }
 function persistCart() {
@@ -175,9 +236,7 @@ function persistCart() {
 }
 
 function renderCart() {
-  const entries = Object.entries(state.cart)
-    .map(([id, qty]) => ({ p: byId(Number(id)), qty }))
-    .filter((e) => e.p);
+  const entries = Object.values(state.cart).map((l) => ({ p: l.product, qty: l.qty }));
   const count = entries.reduce((s, e) => s + e.qty, 0);
   const total = entries.reduce((s, e) => s + e.qty * e.p.price, 0);
   $('cart-count').hidden = count === 0;
@@ -190,7 +249,7 @@ function renderCart() {
   }
   $('cart-items').replaceChildren(...entries.map(({ p, qty }) =>
     el('div', { class: 'line' },
-      el('div', { class: `mini ${gradOf(p)}` }, emojiOf(p)),
+      visual(p, `mini ${gradOf(p)}`),
       el('div', {},
         el('strong', {}, p.name),
         el('small', {}, tl(p.price)),
@@ -230,10 +289,10 @@ function closeDrawer() {
 
 /* ---------- Sohbet ---------- */
 const SUGGESTIONS = [
-  'Öğrenciyim, 25 bin TL altı laptop öner',
-  'Uygun fiyatlı bir kulaklık arıyorum',
-  'Oyun için güçlü bir bilgisayar',
-  'Hediye için akıllı saat',
+  '50 bin TL altı bir laptop öner',
+  'Kablosuz kulaklık arıyorum',
+  'En yüksek puanlı telefonlar hangileri?',
+  'Samsung tablet var mı?',
 ];
 
 function openChat() {
@@ -261,7 +320,7 @@ function botMessage(text, cls = '') { return pushBody(el('div', { class: `msg bo
 
 function recommendation(p) {
   return el('div', { class: 'rec' },
-    el('div', { class: `mini ${gradOf(p)}` }, emojiOf(p)),
+    visual(p, `mini ${gradOf(p)}`),
     el('div', {}, el('strong', { onclick: () => openModal(p.id) }, p.name), el('small', {}, `${tl(p.price)} · ${p.brand}`)),
     el('button', { class: 'add', disabled: p.stock <= 0, onclick: () => addToCart(p.id) }, 'Ekle'),
   );
@@ -288,10 +347,8 @@ async function sendChat(text) {
     typing.remove();
     state.chat.push({ role: 'assistant', content: data.reply });
     botMessage(data.reply);
-    for (const id of data.productIds ?? []) {
-      const p = byId(id);
-      if (p) pushBody(recommendation(p));
-    }
+    remember(data.products ?? []);
+    for (const p of data.products ?? []) pushBody(recommendation(p));
   } catch (e) {
     typing.remove();
     state.chat.pop(); // başarısız mesaj geçmişte kalmasın
@@ -304,8 +361,10 @@ async function sendChat(text) {
 }
 
 /* ---------- Bağlantılar ---------- */
-$('search').addEventListener('input', (e) => { state.query = e.target.value; renderGrid(); });
-$('sort').addEventListener('change', (e) => { state.sort = e.target.value; renderGrid(); });
+$('search').addEventListener('input', (e) => { state.query = e.target.value; refetchSoon(); });
+$('sort').addEventListener('change', (e) => { state.sort = e.target.value; fetchProducts(); });
+$('max-price').addEventListener('change', (e) => { state.maxPrice = e.target.value; fetchProducts(); });
+$('more').addEventListener('click', () => fetchProducts({ append: true }));
 $('cart-btn').addEventListener('click', openDrawer);
 $('drawer-close').addEventListener('click', closeDrawer);
 $('scrim').addEventListener('click', closeDrawer);
@@ -332,3 +391,4 @@ document.addEventListener('keydown', (e) => {
 $('year').textContent = new Date().getFullYear();
 renderCart();
 fetchProducts();
+loadFacets().catch(() => {});

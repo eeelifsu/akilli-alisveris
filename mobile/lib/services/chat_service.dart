@@ -1,17 +1,18 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
+import '../models/product.dart';
 import 'product_service.dart';
 
 class ChatMessage {
   final String role; // 'user' | 'assistant'
   final String content;
-  final List<int> productIds;
+  final List<Product> products;
 
   ChatMessage({
     required this.role,
     required this.content,
-    this.productIds = const [],
+    this.products = const [],
   });
 }
 
@@ -39,7 +40,9 @@ class ChatService {
     return ChatMessage(
       role: 'assistant',
       content: data['reply'] as String,
-      productIds: (data['productIds'] as List).cast<int>(),
+      products: (data['products'] as List)
+          .map((j) => Product.fromJson(j as Map<String, dynamic>))
+          .toList(),
     );
   }
 }

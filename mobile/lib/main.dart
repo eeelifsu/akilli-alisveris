@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import 'cart.dart';
@@ -34,36 +36,112 @@ class ProductListPage extends StatefulWidget {
 }
 
 class _ProductListPageState extends State<ProductListPage> {
+  static const _pageSize = 24;
   final _service = ProductService();
-  late Future<List<Product>> _future;
+  final _scroll = ScrollController();
+  Timer? _debounce;
+
+  List<Product> _items = [];
+  List<Facet> _categories = [];
+  int _total = 0;
+  int _page = 1;
+  bool _loading = true;
+  bool _loadingMore = false;
+  Object? _error;
+  int _requestId = 0;
+
   String _query = '';
   String? _category;
+  String _sort = '';
 
   @override
   void initState() {
     super.initState();
-    _future = _service.getProducts();
+    _scroll.addListener(() {
+      if (_scroll.position.pixels > _scroll.position.maxScrollExtent - 400) {
+        _loadMore();
+      }
+    });
+    _service
+        .getCategories()
+        .then((c) {
+          if (mounted) setState(() => _categories = c);
+        })
+        .catchError((_) {});
+    _load();
   }
 
-  Future<void> _reload() async {
-    final future = _service.getProducts();
-    setState(() => _future = future);
-    try {
-      await future;
-    } catch (_) {}
+  @override
+  void dispose() {
+    _debounce?.cancel();
+    _scroll.dispose();
+    super.dispose();
   }
 
-  Future<void> _openChat() async {
-    final List<Product> products;
+  Future<void> _load() async {
+    final id = ++_requestId;
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
     try {
-      products = await _future;
-    } catch (_) {
-      return;
+      final page = await _service.getProducts(
+        query: _query,
+        category: _category,
+        sort: _sort,
+        pageSize: _pageSize,
+      );
+      if (!mounted || id != _requestId) return;
+      setState(() {
+        _items = page.items;
+        _total = page.total;
+        _page = page.page;
+        _loading = false;
+      });
+    } catch (e) {
+      if (!mounted || id != _requestId) return;
+      setState(() {
+        _error = e;
+        _loading = false;
+      });
     }
-    if (!mounted) return;
+  }
+
+  Future<void> _loadMore() async {
+    if (_loading || _loadingMore || _items.length >= _total) return;
+    final id = _requestId;
+    setState(() => _loadingMore = true);
+    try {
+      final page = await _service.getProducts(
+        query: _query,
+        category: _category,
+        sort: _sort,
+        page: _page + 1,
+        pageSize: _pageSize,
+      );
+      if (!mounted || id != _requestId) return;
+      setState(() {
+        _items = [..._items, ...page.items];
+        _total = page.total;
+        _page = page.page;
+      });
+    } catch (_) {
+      // Sonraki kaydırmada tekrar denenir.
+    } finally {
+      if (mounted) setState(() => _loadingMore = false);
+    }
+  }
+
+  void _onQuery(String value) {
+    _query = value;
+    _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 300), _load);
+  }
+
+  void _openChat() {
     Navigator.of(
       context,
-    ).push(MaterialPageRoute(builder: (_) => ChatPage(products: products)));
+    ).push(MaterialPageRoute(builder: (_) => const ChatPage()));
   }
 
   @override
@@ -96,90 +174,120 @@ class _ProductListPageState extends State<ProductListPage> {
       ),
       body: Column(
         children: [
-          _Header(onQuery: (v) => setState(() => _query = v)),
+          _Header(onQuery: _onQuery),
+          _filters(),
+          Expanded(child: _body()),
+        ],
+      ),
+    );
+  }
+
+  Widget _filters() {
+    return SizedBox(
+      height: 56,
+      child: Row(
+        children: [
           Expanded(
-            child: FutureBuilder<List<Product>>(
-              future: _future,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState != ConnectionState.done) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                if (snapshot.hasError) {
-                  return _ErrorView(error: snapshot.error!, onRetry: _reload);
-                }
-                return _buildList(snapshot.data!);
-              },
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.fromLTRB(16, 10, 0, 10),
+              children: [
+                for (final c in <Facet?>[null, ..._categories])
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: ChoiceChip(
+                      label: Text(
+                        c == null ? 'Tümü' : '${emojiFor(c.name)} ${c.name}',
+                      ),
+                      selected: _category == c?.name,
+                      showCheckmark: false,
+                      selectedColor: brand,
+                      labelStyle: TextStyle(
+                        color: _category == c?.name ? Colors.white : null,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      shape: StadiumBorder(
+                        side: BorderSide(
+                          color: _category == c?.name
+                              ? brand
+                              : const Color(0xFFE6E8F0),
+                        ),
+                      ),
+                      backgroundColor: Colors.white,
+                      onSelected: (_) {
+                        _category = c?.name;
+                        _load();
+                      },
+                    ),
+                  ),
+              ],
             ),
+          ),
+          PopupMenuButton<String>(
+            tooltip: 'Sırala',
+            icon: Icon(
+              Icons.swap_vert_rounded,
+              color: _sort.isEmpty ? null : brand,
+            ),
+            initialValue: _sort,
+            onSelected: (v) {
+              _sort = v;
+              _load();
+            },
+            itemBuilder: (_) => const [
+              PopupMenuItem(value: '', child: Text('Önerilen')),
+              PopupMenuItem(
+                value: 'price_asc',
+                child: Text('Fiyat: düşükten yükseğe'),
+              ),
+              PopupMenuItem(
+                value: 'price_desc',
+                child: Text('Fiyat: yüksekten düşüğe'),
+              ),
+              PopupMenuItem(value: 'rating', child: Text('En yüksek puan')),
+            ],
           ),
         ],
       ),
     );
   }
 
-  Widget _buildList(List<Product> all) {
-    final categories = all.map((p) => p.category).toSet().toList()..sort();
-    final q = _query.toLowerCase();
-    final products = all.where((p) {
-      final okCategory = _category == null || p.category == _category;
-      final okQuery =
-          q.isEmpty ||
-          p.name.toLowerCase().contains(q) ||
-          p.brand.toLowerCase().contains(q) ||
-          p.description.toLowerCase().contains(q);
-      return okCategory && okQuery;
-    }).toList();
-
-    return Column(
-      children: [
-        SizedBox(
-          height: 56,
-          child: ListView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-            children: [
-              for (final c in <String?>[null, ...categories])
-                Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: ChoiceChip(
-                    label: Text(c == null ? 'Tümü' : '${emojiFor(c)} $c'),
-                    selected: _category == c,
-                    showCheckmark: false,
-                    selectedColor: brand,
-                    labelStyle: TextStyle(
-                      color: _category == c ? Colors.white : null,
-                      fontWeight: FontWeight.w600,
+  Widget _body() {
+    if (_loading && _items.isEmpty) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (_error != null) return _ErrorView(error: _error!, onRetry: _load);
+    return RefreshIndicator(
+      onRefresh: _load,
+      child: _items.isEmpty
+          ? ListView(
+              children: const [
+                SizedBox(height: 80),
+                Center(child: Text('🔍 Ürün bulunamadı.')),
+              ],
+            )
+          : ListView.separated(
+              controller: _scroll,
+              padding: const EdgeInsets.fromLTRB(16, 4, 16, 96),
+              itemCount: _items.length + 1,
+              separatorBuilder: (_, _) => const SizedBox(height: 16),
+              itemBuilder: (_, i) {
+                if (i == _items.length) {
+                  return Padding(
+                    padding: const EdgeInsets.all(8),
+                    child: Center(
+                      child: _loadingMore
+                          ? const CircularProgressIndicator()
+                          : Text(
+                              '$_total üründen ${_items.length} tanesi gösteriliyor',
+                              style: const TextStyle(color: Colors.black45),
+                            ),
                     ),
-                    shape: StadiumBorder(
-                      side: BorderSide(
-                        color: _category == c ? brand : const Color(0xFFE6E8F0),
-                      ),
-                    ),
-                    backgroundColor: Colors.white,
-                    onSelected: (_) => setState(() => _category = c),
-                  ),
-                ),
-            ],
-          ),
-        ),
-        Expanded(
-          child: RefreshIndicator(
-            onRefresh: _reload,
-            child: products.isEmpty
-                ? ListView(
-                    children: const [
-                      SizedBox(height: 80),
-                      Center(child: Text('🔍 Ürün bulunamadı.')),
-                    ],
-                  )
-                : ListView.separated(
-                    padding: const EdgeInsets.fromLTRB(16, 4, 16, 96),
-                    itemCount: products.length,
-                    separatorBuilder: (_, _) => const SizedBox(height: 16),
-                    itemBuilder: (_, i) => ProductCard(product: products[i]),
-                  ),
-          ),
-        ),
-      ],
+                  );
+                }
+                return ProductCard(product: _items[i]);
+              },
+            ),
     );
   }
 }

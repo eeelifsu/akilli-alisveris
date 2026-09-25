@@ -34,6 +34,10 @@ class ProductVisual extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final emoji = Text(
+      emojiFor(product.category),
+      style: TextStyle(fontSize: emojiSize),
+    );
     return Container(
       height: height,
       width: double.infinity,
@@ -45,10 +49,21 @@ class ProductVisual extends StatelessWidget {
           end: Alignment.bottomRight,
         ),
       ),
-      child: Text(
-        emojiFor(product.category),
-        style: TextStyle(fontSize: emojiSize),
-      ),
+      child: product.imageUrl == null
+          ? emoji
+          : Padding(
+              padding: EdgeInsets.all(height * 0.1),
+              child: Image.network(
+                product.imageUrl!,
+                fit: BoxFit.contain,
+                errorBuilder: (_, _, _) => emoji,
+                frameBuilder: (_, child, frame, _) => AnimatedOpacity(
+                  opacity: frame == null ? 0 : 1,
+                  duration: const Duration(milliseconds: 250),
+                  child: child,
+                ),
+              ),
+            ),
     );
   }
 }
@@ -74,6 +89,31 @@ class StockTag extends StatelessWidget {
         label,
         style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: fg),
       ),
+    );
+  }
+}
+
+class RatingLabel extends StatelessWidget {
+  const RatingLabel(this.product, {super.key});
+  final Product product;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const Icon(Icons.star_rounded, size: 18, color: Color(0xFFE0A100)),
+        const SizedBox(width: 2),
+        Text(
+          '${product.rating!.toStringAsFixed(1)}'
+          '${product.ratingCount > 0 ? ' (${product.ratingCount})' : ''}',
+          style: const TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            color: Colors.black54,
+          ),
+        ),
+      ],
     );
   }
 }
@@ -122,9 +162,15 @@ class ProductCard extends StatelessWidget {
                       fontWeight: FontWeight.w700,
                     ),
                   ),
+                  if (p.rating != null) ...[
+                    const SizedBox(height: 4),
+                    RatingLabel(p),
+                  ],
                   const SizedBox(height: 4),
                   Text(
                     p.description,
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: Colors.black54,
                     ),

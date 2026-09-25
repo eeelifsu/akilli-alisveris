@@ -7,16 +7,14 @@ import 'theme.dart';
 import 'widgets.dart';
 
 const _suggestions = [
-  'Öğrenciyim, 25 bin TL altı laptop öner',
-  'Uygun fiyatlı bir kulaklık arıyorum',
-  'Oyun için güçlü bir bilgisayar',
-  'Hediye için akıllı saat',
+  '50 bin TL altı bir laptop öner',
+  'Kablosuz kulaklık arıyorum',
+  'En yüksek puanlı telefonlar hangileri?',
+  'Samsung tablet var mı?',
 ];
 
 class ChatPage extends StatefulWidget {
-  const ChatPage({super.key, required this.products});
-
-  final List<Product> products;
+  const ChatPage({super.key});
 
   @override
   State<ChatPage> createState() => _ChatPageState();
@@ -184,12 +182,9 @@ class _ChatPageState extends State<ChatPage> {
 
   List<Widget> _messageWidgets(ChatMessage m) {
     final isUser = m.role == 'user';
-    final suggested = widget.products
-        .where((p) => m.productIds.contains(p.id))
-        .toList();
     return [
       _bubble(isUser, m.content),
-      for (final p in suggested) _recommendation(p),
+      for (final p in m.products) _recommendation(p),
     ];
   }
 

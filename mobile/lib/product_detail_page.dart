@@ -61,6 +61,10 @@ class ProductDetailPage extends StatelessWidget {
                       fontWeight: FontWeight.w800,
                     ),
                   ),
+                  if (p.rating != null) ...[
+                    const SizedBox(height: 6),
+                    RatingLabel(p),
+                  ],
                   const SizedBox(height: 8),
                   Text(
                     tl(p.price),
@@ -78,6 +82,17 @@ class ProductDetailPage extends StatelessWidget {
                       color: Colors.black54,
                     ),
                   ),
+                  if (p.specs != null) ...[
+                    const SizedBox(height: 16),
+                    Text('Özellikler', style: theme.textTheme.titleMedium),
+                    const SizedBox(height: 4),
+                    Text(
+                      p.specs!.replaceAll('; ', '\n'),
+                      style: theme.textTheme.bodyLarge?.copyWith(
+                        color: Colors.black54,
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),

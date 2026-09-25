@@ -52,17 +52,17 @@
           <div class="phone-notch"></div>
           <div class="phone-head"><span>✨</span><div><b>Alışveriş Asistanı</b><small>çevrimiçi</small></div></div>
           <div class="phone-body">
-            <div class="msg user d1">Öğrenciyim, 25 bin TL altı laptop önerir misin?</div>
+            <div class="msg user d1">50 bin TL altı hafif bir laptop önerir misin?</div>
             <div class="msg bot d2">Sana hafif ve uygun fiyatlı bir seçenek buldum 👇</div>
             <div class="rec d3">
               <div class="mini g-Laptop">💻</div>
-              <div><strong>Lenovo IdeaPad Slim 3</strong><small>24.999 ₺ · Lenovo</small></div>
+              <div><strong>Lenovo Yoga 920</strong><small>45.099 ₺ · Lenovo</small></div>
               <span class="add">Ekle</span>
             </div>
-            <div class="msg user d4">Kulaklık da lazım, ucuz olsun</div>
+            <div class="msg user d4">Bir de kablosuz kulaklık lazım</div>
             <div class="rec d5">
               <div class="mini g-Kulaklık">🎧</div>
-              <div><strong>JBL Tune 520BT</strong><small>1.799 ₺ · JBL</small></div>
+              <div><strong>Apple Airpods</strong><small>5.329 ₺ · Apple</small></div>
               <span class="add">Ekle</span>
             </div>
           </div>
@@ -91,15 +91,26 @@
   <main class="container" id="products">
     <div class="toolbar">
       <div class="chips" id="chips" role="tablist" aria-label="Kategoriler"></div>
-      <select id="sort" aria-label="Sırala">
-        <option value="default">Önerilen sıralama</option>
-        <option value="asc">Fiyat: Düşükten yükseğe</option>
-        <option value="desc">Fiyat: Yüksekten düşüğe</option>
-      </select>
+      <div class="selects">
+        <select id="max-price" aria-label="Azami fiyat">
+          <option value="">Tüm fiyatlar</option>
+          <option value="10000">10.000 ₺ altı</option>
+          <option value="25000">25.000 ₺ altı</option>
+          <option value="50000">50.000 ₺ altı</option>
+          <option value="100000">100.000 ₺ altı</option>
+        </select>
+        <select id="sort" aria-label="Sırala">
+          <option value="">Önerilen sıralama</option>
+          <option value="price_asc">Fiyat: Düşükten yükseğe</option>
+          <option value="price_desc">Fiyat: Yüksekten düşüğe</option>
+          <option value="rating">En yüksek puan</option>
+        </select>
+      </div>
     </div>
     <p class="result-info" id="result-info" aria-live="polite"></p>
     <div class="grid" id="grid"></div>
     <div class="state" id="state"></div>
+    <div class="more"><button class="btn ghost" id="more" hidden>Daha fazla göster</button></div>
   </main>
 
   <footer class="footer">
