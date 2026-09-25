@@ -10,7 +10,8 @@
 </p>
 
 <p align="center">
-  <a href="https://akilli-alisveris.onrender.com"><b>Canlı demo →</b></a>
+  <a href="https://akilli-alisveris.onrender.com"><b>Web sitesini dene →</b></a>
+  &nbsp;·&nbsp; <a href="#platformlar">iOS uygulaması</a>
   &nbsp;·&nbsp; <a href="#nasıl-çalışır">Nasıl çalışır</a>
   &nbsp;·&nbsp; <a href="#yerelde-çalıştırma">Yerelde çalıştırma</a>
 </p>
@@ -26,6 +27,16 @@
 ![Ana sayfa](docs/screenshots/web-hero.png)
 
 > Ücretsiz sunucu 15 dakika kullanılmazsa uyur. İlk açılış 30-60 saniye sürebilir.
+
+## Platformlar
+
+Bu depo projenin **tamamını** içerir: web sitesi, iOS uygulaması ve ikisinin bağlandığı sunucu.
+
+| Parça | Durum | Nasıl denenir |
+|---|---|---|
+| **Web sitesi** | Yayında | [akilli-alisveris.onrender.com](https://akilli-alisveris.onrender.com), tarayıcıdan açılır |
+| **iOS uygulaması** (Flutter) | Kaynak kodu hazır, App Store'da **yok** | Xcode ve Flutter ile derlenip simülatörde ya da iPhone'da çalıştırılır ([aşağıda](#ios-uygulamasını-çalıştırma)). Uygulama da aynı canlı sunucuya bağlanır |
+| **Sunucu** (.NET API) | Yayında | Web sitesi ve iOS uygulaması bu sunucuyu kullanır |
 
 ## Öne çıkanlar
 
@@ -118,12 +129,16 @@ dotnet run --launch-profile http          # http://localhost:5065  (isteğe bağ
 
 Ürün verisini yüklemek için: `dotnet run --no-launch-profile -- import gadgets360 --purge` (CSV'ler `data/gadgets360/` içinde).
 
-iOS uygulaması varsayılan olarak canlı sunucuya bağlanır. Yerel sunucu için:
+### iOS uygulamasını çalıştırma
+
+Mac, Xcode ve Flutter gerekir. Uygulama varsayılan olarak canlı sunucuya bağlanır, yani sunucuyu kurmadan da çalışır:
 
 ```bash
 cd mobile
-flutter run --dart-define=API_URL=http://BILGISAYAR_IP:5065
+flutter run                     # açık simülatörde ya da bağlı iPhone'da
 ```
+
+Yerel sunucuya bağlamak için: `flutter run --dart-define=API_URL=http://BILGISAYAR_IP:5065`
 
 ### Ortam değişkenleri
 
