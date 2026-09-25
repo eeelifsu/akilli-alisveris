@@ -1,0 +1,16 @@
+# Render "Blueprint": depoyu bağladığında servisi bu dosyadan kurar.
+services:
+  - type: web
+    name: akilli-alisveris
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /healthz
+    autoDeploy: true
+    envVars:
+      # Neon'dan aldığın bağlantı adresi (postgresql://...). Değeri Render panelinde gir.
+      - key: DATABASE_CONNECTION_STRING
+        sync: false
+      # İsteğe bağlı: Gemini ile daha doğal cevap metinleri. Yoksa şablon cevaplar kullanılır.
+      - key: GEMINI_API_KEY
+        sync: false

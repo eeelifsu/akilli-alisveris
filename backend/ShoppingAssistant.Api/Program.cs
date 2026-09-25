@@ -1,3 +1,5 @@
+using System.Threading.RateLimiting;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using ShoppingAssistant.Api.Data;
 using ShoppingAssistant.Api.Import;
@@ -7,8 +9,13 @@ using ShoppingAssistant.Api.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 // Özellikler (Dictionary) jsonb olarak saklandığı için dinamik JSON açık olmalı.
-var dataSource = new Npgsql.NpgsqlDataSourceBuilder(
-        builder.Configuration.GetConnectionString("DefaultConnection"))
+// Bağlantı: DATABASE_CONNECTION_STRING ortam değişkeni (Neon/Render "postgresql://..." adresi de olur)
+// yoksa appsettings.json içindeki yerel geliştirme bağlantısı kullanılır.
+var connectionString = NormalizeConnectionString(
+    builder.Configuration["DATABASE_CONNECTION_STRING"]
+    ?? builder.Configuration.GetConnectionString("DefaultConnection")
+    ?? throw new InvalidOperationException("Veritabanı bağlantısı yok: DATABASE_CONNECTION_STRING ayarla."));
+var dataSource = new Npgsql.NpgsqlDataSourceBuilder(connectionString)
     .EnableDynamicJson()
     .Build();
 builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(dataSource));
@@ -17,14 +24,30 @@ builder.Services.AddHttpClient<ChatService>(c => c.Timeout = TimeSpan.FromSecond
 builder.Services.AddHttpClient<DummyJsonSource>();
 builder.Services.AddScoped<Gadgets360Source>();
 builder.Services.AddScoped<ProductImporter>();
+builder.Services.AddRateLimiter(o =>
+{
+    o.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    // Asistan Gemini kotasını ve sunucuyu korumak için IP başına dakikada 20 mesaj.
+    o.AddPolicy("chat", ctx => RateLimitPartition.GetFixedWindowLimiter(
+        ctx.Connection.RemoteIpAddress?.ToString() ?? "anon",
+        _ => new FixedWindowRateLimiterOptions { PermitLimit = 20, Window = TimeSpan.FromMinutes(1) }));
+});
 builder.Services.AddCors(o => o.AddDefaultPolicy(p => p.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()));
 
 var app = builder.Build();
+
+// Render gibi ters vekil (proxy) arkasında gerçek istemci IP'sini al.
+var forwarded = new ForwardedHeadersOptions { ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto };
+forwarded.KnownNetworks.Clear();
+forwarded.KnownProxies.Clear();
+app.UseForwardedHeaders(forwarded);
 
 // Kullanım: dotnet run --no-launch-profile -- import <dummyjson|gadgets360> [klasör] [--purge]
 if (args.Length >= 2 && args[0] == "import")
 {
     using var scope = app.Services.CreateScope();
+    // Boş (bulut) veritabanında önce tabloları kur.
+    await scope.ServiceProvider.GetRequiredService<AppDbContext>().Database.MigrateAsync();
     IProductSource source = args[1] switch
     {
         "dummyjson" => scope.ServiceProvider.GetRequiredService<DummyJsonSource>(),
@@ -37,9 +60,21 @@ if (args.Length >= 2 && args[0] == "import")
     return;
 }
 
-app.UseCors();
+// Bulutta veritabanı boşsa tabloları kendisi kurar (AUTO_MIGRATE=true).
+if (app.Configuration.GetValue<bool>("AUTO_MIGRATE"))
+{
+    using var scope = app.Services.CreateScope();
+    await scope.ServiceProvider.GetRequiredService<AppDbContext>().Database.MigrateAsync();
+}
 
-var webRoot = Path.GetFullPath(Path.Combine(builder.Environment.ContentRootPath, "..", "..", "web"));
+app.UseCors();
+app.UseRateLimiter();
+
+app.MapGet("/healthz", () => Results.Ok(new { status = "ok" }));
+
+// Site dosyaları: WebRoot ayarı (Docker'da /app/web) ya da geliştirmede proje kökündeki web/.
+var webRoot = Path.GetFullPath(app.Configuration["WebRoot"]
+    ?? Path.Combine(builder.Environment.ContentRootPath, "..", "..", "web"));
 if (Directory.Exists(webRoot))
 {
     var files = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(webRoot);
@@ -53,6 +88,11 @@ app.MapGet("/api/products", async (
     decimal? minPrice, decimal? maxPrice, bool? inStock, string? sort,
     int? page, int? pageSize) =>
 {
+    // Girdi doğrulama: aşırı uzun değerleri kırp, sıralamayı bilinenlerle sınırla.
+    q = q?.Length > 100 ? q[..100] : q;
+    category = category?.Length > 40 ? null : category;
+    brand = brand?.Length > 40 ? null : brand;
+    sort = sort is "price_asc" or "price_desc" or "rating" ? sort : null;
     var size = Math.Clamp(pageSize ?? 24, 1, 100);
     var pageNo = Math.Max(page ?? 1, 1);
     var query = db.Products.AsNoTracking()
@@ -83,6 +123,11 @@ app.MapPost("/api/chat", async (ChatRequest req, AppDbContext db, ChatService ch
 {
     if (req.Messages is not { Count: > 0 })
         return Results.BadRequest("messages boş olamaz.");
+    if (req.Messages.Any(m => m.Content is null || m.Content.Length > 1000 || (m.Role != "user" && m.Role != "assistant")))
+        return Results.BadRequest("Geçersiz mesaj.");
+    if (req.Messages[^1].Role != "user")
+        return Results.BadRequest("Son mesaj kullanıcıdan olmalı.");
+    req = req with { Messages = req.Messages.TakeLast(12).ToList() };
 
     try
     {
@@ -100,7 +145,7 @@ app.MapPost("/api/chat", async (ChatRequest req, AppDbContext db, ChatService ch
         app.Logger.LogError(e, "Chat isteği başarısız");
         return Results.Problem(app.Environment.IsDevelopment() ? e.Message : "Asistan şu an cevap veremiyor.", statusCode: 502);
     }
-});
+}).RequireRateLimiting("chat");
 
 app.Run();
 
@@ -109,4 +154,23 @@ static Gadgets360Source Gadgets360(IServiceProvider sp, string[] args)
     var source = sp.GetRequiredService<Gadgets360Source>();
     source.Directory = args.Skip(2).FirstOrDefault(a => !a.StartsWith("--"));
     return source;
+}
+
+/// <summary>"postgresql://kullanici:sifre@host/db?sslmode=require" adresini Npgsql biçimine çevirir.</summary>
+static string NormalizeConnectionString(string value)
+{
+    if (!value.StartsWith("postgres://") && !value.StartsWith("postgresql://"))
+        return value;
+    var uri = new Uri(value);
+    var user = uri.UserInfo.Split(':', 2);
+    return new Npgsql.NpgsqlConnectionStringBuilder
+    {
+        Host = uri.Host,
+        Port = uri.Port > 0 ? uri.Port : 5432,
+        Database = uri.AbsolutePath.TrimStart('/'),
+        Username = Uri.UnescapeDataString(user[0]),
+        Password = user.Length > 1 ? Uri.UnescapeDataString(user[1]) : "",
+        // Bulut veritabanları SSL ister; yerel denemede ?sslmode=disable verilebilir.
+        SslMode = uri.Query.Contains("sslmode=disable") ? Npgsql.SslMode.Disable : Npgsql.SslMode.Require,
+    }.ConnectionString;
 }
