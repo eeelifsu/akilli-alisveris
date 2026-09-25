@@ -38,6 +38,12 @@ public class ChatService(HttpClient http, IConfiguration config)
             SADECE aşağıdaki katalogdaki ürünleri öner, katalogda olmayan ürün uydurma.
             Stokta olmayan (stok=0) ürünü önerme. Uygun ürün yoksa bunu dürüstçe söyle.
 
+            MAĞAZA POLİTİKALARI (demo mağaza):
+            - Kargo: 1-3 iş gününde teslim, 500 TL üzeri siparişlerde kargo ücretsiz.
+            - İade: Teslimden sonra 14 gün içinde ücretsiz iade.
+            - Garanti: Tüm ürünlerde 2 yıl resmi distribütör garantisi.
+            Kargo, iade ve garanti sorularını bu bilgilere göre cevapla. Sipariş takibi henüz yok, sorulursa bunu söyle.
+
             KATALOG:
             {{catalog}}
 
