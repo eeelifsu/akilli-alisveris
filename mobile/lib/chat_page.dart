@@ -14,7 +14,10 @@ const _suggestions = [
 ];
 
 class ChatPage extends StatefulWidget {
-  const ChatPage({super.key});
+  const ChatPage({super.key, this.initialMessage});
+
+  /// Açılır açılmaz asistana gönderilecek mesaj (ana ekrandaki arama kutusundan).
+  final String? initialMessage;
 
   @override
   State<ChatPage> createState() => _ChatPageState();
@@ -27,6 +30,15 @@ class _ChatPageState extends State<ChatPage> {
   final List<ChatMessage> _messages = [];
   bool _loading = false;
   String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    final first = widget.initialMessage;
+    if (first != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _send(first));
+    }
+  }
 
   @override
   void dispose() {
@@ -107,6 +119,10 @@ class _ChatPageState extends State<ChatPage> {
                   'Merhaba! 👋 Bütçeni ve ne aradığını yaz, sana uygun ürünleri önereyim.',
                 ),
                 for (final m in _messages) ..._messageWidgets(m),
+                if (!_loading &&
+                    _messages.isNotEmpty &&
+                    _messages.last.options.isNotEmpty)
+                  _options(_messages.last.options),
                 if (_loading) _typing(),
                 if (_error != null) _bubble(false, '$_error', error: true),
               ],
@@ -175,6 +191,32 @@ class _ChatPageState extends State<ChatPage> {
               ),
             ),
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _options(List<String> options) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Wrap(
+        spacing: 8,
+        runSpacing: 8,
+        children: [
+          for (final o in options)
+            ActionChip(
+              label: Text(
+                o,
+                style: const TextStyle(
+                  color: brand,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              backgroundColor: Colors.white,
+              side: const BorderSide(color: brand),
+              shape: const StadiumBorder(),
+              onPressed: () => _send(o),
+            ),
         ],
       ),
     );

@@ -8,11 +8,13 @@ class ChatMessage {
   final String role; // 'user' | 'assistant'
   final String content;
   final List<Product> products;
+  final List<String> options;
 
   ChatMessage({
     required this.role,
     required this.content,
     this.products = const [],
+    this.options = const [],
   });
 }
 
@@ -43,6 +45,7 @@ class ChatService {
       products: (data['products'] as List)
           .map((j) => Product.fromJson(j as Map<String, dynamic>))
           .toList(),
+      options: ((data['options'] as List?) ?? const []).cast<String>(),
     );
   }
 }

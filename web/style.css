@@ -310,3 +310,7 @@ select { height: 42px; padding: 0 12px; border-radius: 12px; border: 1px solid v
   .chat-fab b { display: none; } .chat-fab { padding: 0 18px; }
 }
 @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } .phone.big .phone-body > * { opacity: 1; } }
+
+.opts { display: flex; flex-wrap: wrap; gap: 8px; align-self: flex-start; }
+.opts button { padding: 8px 14px; border-radius: 999px; border: 1px solid var(--brand); background: var(--surface); color: var(--brand); font-size: 13.5px; font-weight: 600; }
+.opts button:hover { background: var(--brand); color: #fff; }

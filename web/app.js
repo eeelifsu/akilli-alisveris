@@ -362,6 +362,10 @@ async function sendChat(text) {
     botMessage(data.reply);
     remember(data.products ?? []);
     for (const p of data.products ?? []) pushBody(recommendation(p));
+    if (data.options?.length) {
+      pushBody(el('div', { class: 'opts' }, ...data.options.map((t) =>
+        el('button', { type: 'button', onclick: (e) => { e.currentTarget.parentElement.remove(); sendChat(t); } }, t))));
+    }
   } catch (e) {
     typing.remove();
     state.chat.pop(); // başarısız mesaj geçmişte kalmasın

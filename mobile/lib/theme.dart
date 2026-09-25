@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 const brand = Color(0xFF5B4BFF);
 const brand2 = Color(0xFF9B5BFF);
+const mint = Color(0xFF27E08C);
 const brandGradient = LinearGradient(
   colors: [brand, brand2],
   begin: Alignment.topLeft,
@@ -13,7 +14,7 @@ ThemeData buildTheme() {
   return ThemeData(
     useMaterial3: true,
     colorScheme: scheme,
-    scaffoldBackgroundColor: const Color(0xFFF6F7FB),
+    scaffoldBackgroundColor: const Color(0xFFF6F6F3),
     cardTheme: CardThemeData(
       color: Colors.white,
       elevation: 0,

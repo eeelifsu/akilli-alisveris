@@ -138,10 +138,35 @@ class _ProductListPageState extends State<ProductListPage> {
     _debounce = Timer(const Duration(milliseconds: 300), _load);
   }
 
-  void _openChat() {
-    Navigator.of(
-      context,
-    ).push(MaterialPageRoute(builder: (_) => const ChatPage()));
+  void _openChat([String? message]) {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => ChatPage(initialMessage: message)),
+    );
+  }
+
+  Widget _searchBox() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
+      child: TextField(
+        onChanged: _onQuery,
+        decoration: InputDecoration(
+          hintText: 'Mağazada ürün, marka ara…',
+          prefixIcon: const Icon(Icons.search),
+          filled: true,
+          fillColor: Colors.white,
+          isDense: true,
+          contentPadding: const EdgeInsets.symmetric(vertical: 14),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(999),
+            borderSide: const BorderSide(color: Color(0xFFE8E8EE)),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(999),
+            borderSide: const BorderSide(color: brand),
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -149,11 +174,11 @@ class _ProductListPageState extends State<ProductListPage> {
     return Scaffold(
       floatingActionButton: DecoratedBox(
         decoration: BoxDecoration(
-          gradient: brandGradient,
+          color: mint,
           borderRadius: BorderRadius.circular(999),
           boxShadow: [
             BoxShadow(
-              color: brand.withValues(alpha: .4),
+              color: mint.withValues(alpha: .45),
               blurRadius: 18,
               offset: const Offset(0, 8),
             ),
@@ -162,19 +187,20 @@ class _ProductListPageState extends State<ProductListPage> {
         child: TextButton.icon(
           onPressed: _openChat,
           style: TextButton.styleFrom(
-            foregroundColor: Colors.white,
+            foregroundColor: const Color(0xFF08281A),
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
           ),
           icon: const Text('✨', style: TextStyle(fontSize: 18)),
           label: const Text(
             'Asistan',
-            style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
+            style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
           ),
         ),
       ),
       body: Column(
         children: [
-          _Header(onQuery: _onQuery),
+          _Header(onAsk: _openChat),
+          _searchBox(),
           _filters(),
           Expanded(child: _body()),
         ],
@@ -292,10 +318,36 @@ class _ProductListPageState extends State<ProductListPage> {
   }
 }
 
-class _Header extends StatelessWidget {
-  const _Header({required this.onQuery});
+class _Header extends StatefulWidget {
+  const _Header({required this.onAsk});
 
-  final ValueChanged<String> onQuery;
+  final ValueChanged<String?> onAsk;
+
+  @override
+  State<_Header> createState() => _HeaderState();
+}
+
+class _HeaderState extends State<_Header> {
+  final _controller = TextEditingController();
+
+  static const _prompts = [
+    '50 bin TL altı yazılım için laptop',
+    '10 bin TL altı telefon',
+    'Kablosuz kulaklık öner',
+  ];
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _submit([String? text]) {
+    final value = (text ?? _controller.text).trim();
+    _controller.clear();
+    FocusScope.of(context).unfocus();
+    widget.onAsk(value.isEmpty ? null : value);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -307,7 +359,7 @@ class _Header extends StatelessWidget {
       child: SafeArea(
         bottom: false,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 8, 12, 20),
+          padding: const EdgeInsets.fromLTRB(20, 8, 12, 18),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -341,27 +393,85 @@ class _Header extends StatelessWidget {
                   ),
                 ],
               ),
+              const SizedBox(height: 4),
               const Text(
-                'Ne aradığını söyle, en uygununu bulalım.',
-                style: TextStyle(color: Colors.white70, fontSize: 14),
+                'Ne aradığını anlat,\nen uygununu birlikte bulalım.',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  height: 1.25,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
               const SizedBox(height: 14),
               Padding(
                 padding: const EdgeInsets.only(right: 8),
                 child: TextField(
-                  onChanged: onQuery,
+                  controller: _controller,
+                  onSubmitted: _submit,
+                  textInputAction: TextInputAction.send,
                   decoration: InputDecoration(
-                    hintText: 'Ürün, marka ara…',
-                    prefixIcon: const Icon(Icons.search),
+                    hintText: 'Örn: 50.000 TL altı laptop…',
+                    prefixIcon: const Padding(
+                      padding: EdgeInsets.only(left: 14, right: 6),
+                      child: Text('✨', style: TextStyle(fontSize: 18)),
+                    ),
+                    prefixIconConstraints: const BoxConstraints(
+                      minWidth: 0,
+                      minHeight: 0,
+                    ),
+                    suffixIcon: Padding(
+                      padding: const EdgeInsets.all(5),
+                      child: IconButton.filled(
+                        style: IconButton.styleFrom(backgroundColor: brand),
+                        onPressed: _submit,
+                        icon: const Icon(Icons.arrow_forward_rounded, size: 20),
+                      ),
+                    ),
                     filled: true,
                     fillColor: Colors.white,
                     isDense: true,
-                    contentPadding: const EdgeInsets.symmetric(vertical: 14),
+                    contentPadding: const EdgeInsets.symmetric(vertical: 16),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(999),
                       borderSide: BorderSide.none,
                     ),
                   ),
+                ),
+              ),
+              const SizedBox(height: 10),
+              SizedBox(
+                height: 34,
+                child: ListView(
+                  scrollDirection: Axis.horizontal,
+                  children: [
+                    for (final p in _prompts)
+                      Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: GestureDetector(
+                          onTap: () => _submit(p),
+                          child: Container(
+                            alignment: Alignment.center,
+                            padding: const EdgeInsets.symmetric(horizontal: 14),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: .2),
+                              borderRadius: BorderRadius.circular(999),
+                              border: Border.all(
+                                color: Colors.white.withValues(alpha: .45),
+                              ),
+                            ),
+                            child: Text(
+                              p,
+                              style: const TextStyle(
+                                fontSize: 12.5,
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
               ),
             ],
