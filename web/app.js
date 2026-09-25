@@ -89,8 +89,13 @@ async function getJson(path) {
 
 async function loadFacets() {
   state.facets = await getJson('/api/facets');
-  $('fact-products').textContent = state.facets.total;
-  $('fact-cats').textContent = state.facets.categories.length;
+  const f = state.facets;
+  $('fact-products').textContent = new Intl.NumberFormat('tr-TR').format(f.total);
+  $('fact-cats').textContent = f.categories.length;
+  $('stat-products').dataset.to = f.total;
+  $('stat-cats').dataset.to = f.categories.length;
+  $('stat-brands').dataset.to = f.brandCount ?? 0;
+  observeCounters();
   renderChips();
 }
 
@@ -368,6 +373,98 @@ async function sendChat(text) {
   }
 }
 
+/* ---------- Ana sayfa: hero, demolar, sayaçlar ---------- */
+const HERO_PROMPTS = [
+  '50 bin TL altı yazılım için laptop',
+  'Kablosuz kulaklık öner',
+  '10 bin TL altı telefon',
+  'Kargo ve iade nasıl?',
+];
+
+/** Sohbeti açar; metin varsa doğrudan asistana gönderir. */
+function askAssistant(text) {
+  openChat();
+  if (text) sendChat(text);
+}
+
+function renderHeroPrompts() {
+  $('hero-prompts').replaceChildren(...HERO_PROMPTS.map((t) =>
+    el('button', { type: 'button', onclick: () => askAssistant(t) }, t)));
+}
+
+function startWordRotation() {
+  const words = ['laptopu', 'telefonu', 'kulaklığı', 'televizyonu', 'tableti', 'kamerayı'];
+  const node = $('rot');
+  let i = 0;
+  setInterval(() => {
+    i = (i + 1) % words.length;
+    node.textContent = words[i];
+    node.style.animation = 'none';
+    void node.offsetWidth; // animasyonu yeniden başlat
+    node.style.animation = '';
+  }, 2200);
+}
+
+/** Telefon maketlerindeki mini ürün kartı. */
+function demoCard(p) {
+  const img = visual(p, `dimg ${gradOf(p)}`);
+  return el('div', { class: 'dcard' },
+    img,
+    el('div', { class: 'dbody' },
+      el('strong', {}, p.name),
+      el('small', {}, p.brand),
+      el('span', { class: 'dprice' }, tl(p.price)),
+      el('button', { onclick: () => openModal(p.id) }, 'Detay'),
+      el('button', { class: 'dark', onclick: () => addToCart(p.id) }, 'Sepete ekle'),
+    ),
+  );
+}
+
+const DEMOS = {
+  laptop: 'category=Laptop&maxPrice=40000&sort=rating&inStock=true&pageSize=2',
+  headphone: 'category=Kulakl%C4%B1k&sort=rating&inStock=true&pageSize=2',
+  phone: 'category=Telefon&maxPrice=10000&sort=rating&inStock=true&pageSize=2',
+};
+
+async function loadDemos() {
+  const targets = [
+    ...document.querySelectorAll('.mini-cards[data-scenario]'),
+    { dataset: { scenario: 'laptop' }, hero: $('hero-cards') },
+  ];
+  await Promise.all(targets.map(async (t) => {
+    const box = t.hero ?? t;
+    try {
+      const data = await getJson(`/api/products?${DEMOS[t.dataset.scenario]}`);
+      remember(data.items);
+      box.replaceChildren(...data.items.map(demoCard));
+    } catch { box.replaceChildren(); }
+  }));
+}
+
+/** Sayaçları ekrana girince 0'dan hedef değere doğru saydırır. */
+let counterObserver;
+function observeCounters() {
+  counterObserver?.disconnect();
+  counterObserver = new IntersectionObserver((entries) => {
+    for (const e of entries) {
+      if (!e.isIntersecting) continue;
+      counterObserver.unobserve(e.target);
+      countUp(e.target, Number(e.target.dataset.to) || 0);
+    }
+  }, { threshold: 0.4 });
+  document.querySelectorAll('.count').forEach((n) => counterObserver.observe(n));
+}
+function countUp(node, to) {
+  const start = performance.now(), dur = 1200;
+  const fmt = new Intl.NumberFormat('tr-TR');
+  const tick = (now) => {
+    const t = Math.min((now - start) / dur, 1);
+    node.textContent = fmt.format(Math.round(to * (1 - Math.pow(1 - t, 3))));
+    if (t < 1) requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+}
+
 /* ---------- Bağlantılar ---------- */
 $('search').addEventListener('input', (e) => { state.query = e.target.value; refetchSoon(); });
 $('sort').addEventListener('change', (e) => { state.sort = e.target.value; fetchProducts(); });
@@ -380,7 +477,14 @@ $('modal-close').addEventListener('click', closeModal);
 $('modal').addEventListener('click', (e) => { if (e.target === $('modal')) closeModal(); });
 $('m-add').addEventListener('click', () => { if (modalProduct) addToCart(modalProduct.id); });
 $('chat-fab').addEventListener('click', openChat);
-$('hero-chat').addEventListener('click', openChat);
+$('nav-chat').addEventListener('click', openChat);
+$('footer-chat').addEventListener('click', openChat);
+$('ask-form').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const text = $('ask-input').value.trim();
+  $('ask-input').value = '';
+  askAssistant(text);
+});
 $('chat-close').addEventListener('click', closeChat);
 $('chat-form').addEventListener('submit', (e) => {
   e.preventDefault();
@@ -398,5 +502,8 @@ document.addEventListener('keydown', (e) => {
 
 $('year').textContent = new Date().getFullYear();
 renderCart();
+renderHeroPrompts();
+startWordRotation();
 fetchProducts();
 loadFacets().catch(() => {});
+loadDemos();

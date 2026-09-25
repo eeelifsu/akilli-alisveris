@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Akıllı Alışveriş</title>
-  <meta name="description" content="Yapay zekâ asistanıyla sana en uygun ürünü bul.">
+  <meta name="description" content="Ne aradığını anlat, yapay zekâ asistanı gerçek ürün kataloğundan sana en uygununu bulsun.">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛍️</text></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -12,83 +12,193 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header class="topbar">
-    <div class="container topbar-inner">
+  <!-- Menü -->
+  <header class="nav-wrap">
+    <nav class="nav" aria-label="Ana menü">
       <a href="#" class="brand" aria-label="Akıllı Alışveriş">
         <span class="brand-mark">🛍️</span><span>Akıllı<b>Alışveriş</b></span>
       </a>
-      <nav class="nav" aria-label="Sayfa bölümleri">
-        <a href="#features">Özellikler</a><a href="#products">Mağaza</a>
-      </nav>
-      <label class="search" aria-label="Ürün ara">
-        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-        <input id="search" type="search" placeholder="Ürün, marka veya özellik ara…" autocomplete="off">
-      </label>
+      <div class="nav-links">
+        <a href="#demo">Asistan</a>
+        <a href="#features">Özellikler</a>
+        <a href="#products">Mağaza</a>
+      </div>
+      <span class="spacer"></span>
       <button class="icon-btn" id="cart-btn" aria-label="Sepeti aç">
         <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6h15l-1.5 9h-12z"/><path d="M6 6 5 3H2"/><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/></svg>
         <span class="badge" id="cart-count" hidden>0</span>
       </button>
-    </div>
+      <button class="btn mint sm" id="nav-chat">Asistanı dene</button>
+    </nav>
   </header>
 
+  <!-- Hero -->
   <section class="hero">
     <div class="container hero-inner">
-      <div>
-        <p class="eyebrow">✨ Yapay zekâ alışveriş asistanı</p>
-        <h1>Alışverişin her adımında<br><span class="grad">akıllı bir yardımcı.</span></h1>
-        <p class="lead">Ne aradığını ve bütçeni yaz. Asistanımız kataloğu senin için tarasın, en uygun ürünleri bulup önersin, sepetine eklesin.</p>
-        <div class="hero-actions">
-          <button class="btn primary" id="hero-chat">Asistanı dene →</button>
-          <a class="btn ghost" href="#products">Mağazaya göz at</a>
-        </div>
-        <ul class="facts" id="facts" aria-label="Mağaza özeti">
-          <li><b id="fact-products">–</b><span>ürün</span></li>
-          <li><b id="fact-cats">–</b><span>kategori</span></li>
-          <li><b>7/24</b><span>asistan</span></li>
+      <div class="hero-copy">
+        <h1>
+          <span>Doğru</span>
+          <span class="rot-line"><span class="rot" id="rot">laptopu</span></span>
+          <span>birlikte bulalım.</span>
+        </h1>
+        <p class="lead">Ne aradığını ve bütçeni anlat. Yapay zekâ asistanımız gerçek ürün kataloğunda arasın, stoktaki en uygun seçenekleri önüne getirsin.</p>
+
+        <form class="ask" id="ask-form">
+          <input id="ask-input" placeholder="Örneğin: 50.000 TL altında yazılım geliştirme için laptop…" autocomplete="off" maxlength="300" aria-label="Ne arıyorsun?">
+          <button class="btn primary" type="submit">Sor <span aria-hidden="true">→</span></button>
+        </form>
+        <div class="prompts" id="hero-prompts"></div>
+
+        <ul class="trust" aria-label="Öne çıkanlar">
+          <li><b id="fact-products">–</b> gerçek ürün</li>
+          <li><b id="fact-cats">–</b> kategori</li>
+          <li>Web + iOS</li>
         </ul>
       </div>
-      <div class="phone-wrap" aria-hidden="true">
-        <div class="phone">
+
+      <div class="hero-visual" aria-hidden="false">
+        <div class="blob"></div>
+        <div class="phone big">
           <div class="phone-notch"></div>
-          <div class="phone-head"><span>✨</span><div><b>Alışveriş Asistanı</b><small>çevrimiçi</small></div></div>
-          <div class="phone-body">
-            <div class="msg user d1">50 bin TL altı hafif bir laptop önerir misin?</div>
-            <div class="msg bot d2">Sana hafif ve uygun fiyatlı bir seçenek buldum 👇</div>
-            <div class="rec d3">
-              <div class="mini g-Laptop">💻</div>
-              <div><strong>Lenovo Yoga 920</strong><small>45.099 ₺ · Lenovo</small></div>
-              <span class="add">Ekle</span>
-            </div>
-            <div class="msg user d4">Bir de kablosuz kulaklık lazım</div>
-            <div class="rec d5">
-              <div class="mini g-Kulaklık">🎧</div>
-              <div><strong>Apple Airpods</strong><small>5.329 ₺ · Apple</small></div>
-              <span class="add">Ekle</span>
-            </div>
+          <div class="phone-head pink">
+            <span class="avatar">✨</span>
+            <div><b>Akıllı Asistan</b><small>çevrimiçi</small></div>
           </div>
+          <div class="phone-body">
+            <div class="msg user d1">Öğrenciyim, 40 bin TL altı bir laptop arıyorum.</div>
+            <div class="msg bot d2">Bütçene uyan, puanı yüksek seçenekler buldum 👇</div>
+            <div class="mini-cards d3" id="hero-cards"></div>
+          </div>
+          <div class="phone-input">Mesajını yaz…</div>
         </div>
       </div>
     </div>
   </section>
 
-  <section class="features container" id="features">
+  <!-- Asistan demoları -->
+  <section class="container demo" id="demo">
     <div class="section-head">
-      <p class="eyebrow">Neler yapabilir?</p>
-      <h2>Keşfetmekten sepete, tek bir sohbet</h2>
+      <h2>Asistan iş başında</h2>
+      <p>Ürünler gerçek kataloğumuzdan gelir. Konuşmalar örnektir.</p>
     </div>
-    <div class="feature-grid">
-      <article><span>💬</span><h3>Doğal dilde arama</h3><p>“Öğrenciyim, 25 bin TL altı laptop” de yeter. Filtreyle uğraşma.</p></article>
-      <article><span>🎯</span><h3>Kişisel öneriler</h3><p>Bütçene ve ihtiyacına göre kataloğumuzdan ürün seçer, neden uygun olduğunu anlatır.</p></article>
-      <article><span>📦</span><h3>Stok bilgisi</h3><p>Sadece stokta olan ürünleri önerir, tükenenleri asla önermez.</p></article>
-      <article><span>🛒</span><h3>Sohbetten sepete</h3><p>Önerilen ürünü sohbetten çıkmadan tek dokunuşla sepete ekle.</p></article>
-      <article><span>🧾</span><h3>Mağaza politikaları</h3><p>Kargo, iade ve garanti sorularını anında cevaplar.</p></article>
-      <article><span>📱</span><h3>Web ve mobil</h3><p>Aynı asistan hem bu sitede hem iPhone uygulamasında, tek bir sunucudan çalışır.</p></article>
+    <div class="phones" id="phones">
+      <div class="phone">
+        <div class="phone-notch"></div>
+        <div class="phone-head sun"><span class="avatar">💻</span><div><b>Laptop</b><small>bütçeye göre</small></div></div>
+        <div class="phone-body">
+          <div class="msg user">40 bin TL altı, hafif bir laptop var mı?</div>
+          <div class="msg bot">İşte puanı en yüksek olanlar:</div>
+          <div class="mini-cards" data-scenario="laptop"></div>
+        </div>
+        <div class="phone-input">Mesajını yaz…</div>
+      </div>
+      <div class="phone">
+        <div class="phone-notch"></div>
+        <div class="phone-head sky"><span class="avatar">🎧</span><div><b>Kulaklık</b><small>ihtiyaca göre</small></div></div>
+        <div class="phone-body">
+          <div class="msg user">Kablosuz bir kulaklık arıyorum.</div>
+          <div class="msg bot">Şunlar stokta ve iyi puan almış:</div>
+          <div class="mini-cards" data-scenario="headphone"></div>
+        </div>
+        <div class="phone-input">Mesajını yaz…</div>
+      </div>
+      <div class="phone">
+        <div class="phone-notch"></div>
+        <div class="phone-head mintg"><span class="avatar">🧾</span><div><b>Politikalar</b><small>kargo &amp; iade</small></div></div>
+        <div class="phone-body">
+          <div class="msg user">İade ve kargo nasıl işliyor?</div>
+          <div class="msg bot">Kargo 1-3 iş gününde gelir, 500 ₺ üzeri ücretsiz. Teslimden sonra 14 gün içinde ücretsiz iade edebilirsin. Tüm ürünlerde 2 yıl garanti var.<br><small>(demo mağaza politikası)</small></div>
+        </div>
+        <div class="phone-input">Mesajını yaz…</div>
+      </div>
+      <div class="phone">
+        <div class="phone-notch"></div>
+        <div class="phone-head violet"><span class="avatar">📱</span><div><b>Telefon</b><small>fiyata göre</small></div></div>
+        <div class="phone-body">
+          <div class="msg user">10 bin TL altı bir telefon önerir misin?</div>
+          <div class="msg bot">Bütçene uygun, stokta olan telefonlar:</div>
+          <div class="mini-cards" data-scenario="phone"></div>
+        </div>
+        <div class="phone-input">Mesajını yaz…</div>
+      </div>
     </div>
   </section>
 
-  <div class="container store-head"><p class="eyebrow">Demo mağaza</p><h2>Ürünleri keşfet</h2></div>
+  <!-- Rakamlar -->
+  <section class="container">
+    <div class="stats-box">
+      <h2>Rakamlarla Akıllı Alışveriş</h2>
+      <div class="stats">
+        <div><b class="count" id="stat-products" data-to="0">0</b><span>gerçek ürün<br>katalogda</span></div>
+        <div><b class="count" id="stat-cats" data-to="0">0</b><span>ürün kategorisi</span></div>
+        <div><b class="count" id="stat-brands" data-to="0">0</b><span>farklı marka</span></div>
+        <div><b class="count" data-to="2">0</b><span>platform: web ve iOS,<br>tek sunucu</span></div>
+      </div>
+      <p class="fine">* Rakamlar mağaza kataloğundan canlı hesaplanır.</p>
+    </div>
+  </section>
+
+  <!-- Özellikler -->
+  <section class="container features" id="features">
+    <div class="fgrid">
+      <article class="fcard sun">
+        <h3>Doğal dilde arama</h3>
+        <p>Filtrelerle uğraşma. İhtiyacını cümleyle anlat, bütçeni ve kullanım amacını asistan anlasın.</p>
+        <div class="chat-demo">
+          <div class="bubble right">Oyun ve yazılım için laptop, 50 bin TL civarı.</div>
+          <div class="bubble left">Tamam! Güçlü işlemcili, yeterli RAM'li seçeneklere bakıyorum.</div>
+        </div>
+      </article>
+      <article class="fcard lav">
+        <h3>Gerçek ürünler, uydurma yok</h3>
+        <p>Asistan yalnızca veritabanındaki ürünleri önerir. Fiyat, puan ve özellik bilgisi katalogdan gelir.</p>
+        <div class="chat-demo">
+          <div class="bubble right">Bu telefonun kaç GB RAM'i var?</div>
+          <div class="bubble left">Katalogdaki bilgiye göre 6 GB RAM, 64 GB depolama.</div>
+        </div>
+      </article>
+      <article class="fcard mint">
+        <h3>Stok ve fiyat kontrolü</h3>
+        <p>Tükenen ürünler önerilmez. Fiyatlar TL cinsinden, görsel ve puanla birlikte gösterilir.</p>
+        <div class="chat-demo">
+          <div class="bubble right">10 bin TL altı bir telefon.</div>
+          <div class="bubble left">Stokta olan, bütçene uygun telefonları listeledim.</div>
+        </div>
+      </article>
+      <article class="fcard sun">
+        <h3>Mağaza politikaları</h3>
+        <p>Kargo, iade ve garanti sorularını asistan anında cevaplar. Politikalar demo mağaza için tanımlıdır.</p>
+        <div class="chat-demo">
+          <div class="bubble right">İade süresi kaç gün?</div>
+          <div class="bubble left">Teslimden sonra 14 gün içinde ücretsiz iade edebilirsin.</div>
+        </div>
+      </article>
+      <article class="fcard lav">
+        <h3>Sohbetten sepete</h3>
+        <p>Önerilen ürünü sohbetten çıkmadan sepete ekle, detayına bak.</p>
+        <div class="chat-demo">
+          <div class="bubble left">Şu kulaklığı öneririm 👇</div>
+          <div class="bubble right">Güzel, sepete ekle.</div>
+        </div>
+      </article>
+      <article class="fcard mint">
+        <h3>Web ve iOS uygulaması</h3>
+        <p>Aynı asistan hem bu sitede hem iPhone uygulamasında, tek bir sunucudan çalışır.</p>
+        <div class="chat-demo">
+          <div class="bubble left">Aynı katalog, aynı asistan: hem web hem iPhone.</div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- Mağaza -->
+  <div class="container store-head" id="store"><h2>Mağaza</h2><p>Kataloğumuzdaki ürünlere göz at, ara ve filtrele.</p></div>
 
   <main class="container" id="products">
+    <label class="search" aria-label="Ürün ara">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="search" type="search" placeholder="Ürün, marka veya özellik ara…" autocomplete="off">
+    </label>
     <div class="toolbar">
       <div class="chips" id="chips" role="tablist" aria-label="Kategoriler"></div>
       <div class="selects">
@@ -113,8 +223,24 @@
     <div class="more"><button class="btn ghost" id="more" hidden>Daha fazla göster</button></div>
   </main>
 
+  <!-- Alt bilgi -->
   <footer class="footer">
-    <div class="container">© <span id="year"></span> Akıllı Alışveriş · Yapay zekâ destekli alışveriş asistanı</div>
+    <div class="container footer-grid">
+      <div>
+        <a href="#" class="brand light"><span class="brand-mark">🛍️</span><span>Akıllı<b>Alışveriş</b></span></a>
+        <p>Yapay zekâ destekli, gerçek ürün verisiyle çalışan alışveriş asistanı.</p>
+        <button class="btn primary sm" id="footer-chat">Asistanı dene</button>
+      </div>
+      <div>
+        <h4>Keşfet</h4>
+        <a href="#demo">Asistan</a><a href="#features">Özellikler</a><a href="#products">Mağaza</a>
+      </div>
+      <div>
+        <h4>Veri hakkında</h4>
+        <p class="small">Ürünler Kaggle'daki Gadgets360 veri setinden alınmıştır (2021, Hindistan pazarı). Fiyatlar ₹'dan ₺'ye çevrilmiş, stok ve politikalar demo amaçlıdır.</p>
+      </div>
+    </div>
+    <div class="container copy">© <span id="year"></span> Akıllı Alışveriş · Bu bir demo projesidir.</div>
   </footer>
 
   <!-- Ürün detayı -->

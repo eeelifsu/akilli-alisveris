@@ -39,7 +39,9 @@ public static class ProductQuery
         {
             "price_asc" => q.OrderBy(p => p.Price).ThenBy(p => p.Id),
             "price_desc" => q.OrderByDescending(p => p.Price).ThenBy(p => p.Id),
-            "rating" => q.OrderByDescending(p => p.Rating).ThenBy(p => p.Id),
+            // PostgreSQL DESC sıralamada NULL'ları başa koyar; puansız ürünler sona gitsin.
+            "rating" => q.OrderByDescending(p => p.Rating.HasValue).ThenByDescending(p => p.Rating)
+                .ThenByDescending(p => p.RatingCount).ThenBy(p => p.Id),
             // Varsayılan: yeni ürünler önce, sonra çok değerlendirilenler.
             _ => q.OrderByDescending(p => p.ReleaseYear.HasValue).ThenByDescending(p => p.ReleaseYear)
                 .ThenByDescending(p => p.RatingCount).ThenBy(p => p.Id),

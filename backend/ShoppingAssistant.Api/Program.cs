@@ -76,6 +76,7 @@ app.MapGet("/api/facets", async (AppDbContext db) => Results.Ok(new
     brands = await db.Products.GroupBy(p => p.Brand)
         .Select(g => new { name = g.Key, count = g.Count() }).OrderByDescending(x => x.count).Take(50).ToListAsync(),
     total = await db.Products.CountAsync(),
+    brandCount = await db.Products.Select(p => p.Brand).Distinct().CountAsync(),
 }));
 
 app.MapPost("/api/chat", async (ChatRequest req, AppDbContext db, ChatService chat) =>
