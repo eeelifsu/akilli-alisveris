@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -40,17 +41,19 @@ public class ChatService(HttpClient http, IConfiguration config, ILogger<ChatSer
         }
         catch (ProviderBusyException busy)
         {
-            var last = busy;
+            var tried = new List<string> { GeminiModel };
             foreach (var model in await FallbackModelsAsync())
             {
                 try
                 {
                     logger.LogWarning("{Primary} yoğun, {Model} deneniyor", GeminiModel, model);
+                    tried.Add(model);
                     return await AskGeminiAsync(messages, db, categories, model);
                 }
-                catch (ProviderBusyException e) { last = e; }
+                catch (ProviderBusyException) { }
+                catch (InvalidOperationException e) { logger.LogWarning("{Model} kullanılamadı: {Msg}", model, e.Message[..Math.Min(200, e.Message.Length)]); }
             }
-            throw last;
+            throw new ProviderBusyException($"Tüm modeller yoğun ya da kota dolu. Denenen: {string.Join(", ", tried)}. İlk hata: {busy.Message[..Math.Min(300, busy.Message.Length)]}");
         }
     }
 
@@ -70,10 +73,9 @@ public class ChatService(HttpClient http, IConfiguration config, ILogger<ChatSer
             _fallbacks = doc.RootElement.GetProperty("models").EnumerateArray()
                 .Where(m => m.GetProperty("supportedGenerationMethods").EnumerateArray().Any(x => x.GetString() == "generateContent"))
                 .Select(m => m.GetProperty("name").GetString()!.Replace("models/", ""))
-                .Where(n => n.Contains("flash") && n != GeminiModel &&
-                            !System.Text.RegularExpressions.Regex.IsMatch(n, "image|tts|live|audio|embed|exp|preview|thinking|latest"))
+                .Where(n => n.Contains("flash") &&
+                            !System.Text.RegularExpressions.Regex.IsMatch(n, "image|tts|live|audio|embed|exp|preview|thinking|native"))
                 .OrderByDescending(n => n, StringComparer.Ordinal)
-                .Take(3)
                 .ToList();
         }
         catch (Exception e)
@@ -81,6 +83,11 @@ public class ChatService(HttpClient http, IConfiguration config, ILogger<ChatSer
             logger.LogWarning(e, "Model listesi alınamadı");
             _fallbacks = [];
         }
+        // Liste boş ya da eksikse Google'ın sabit takma adlarını da dene.
+        foreach (var alias in new[] { "gemini-flash-latest", "gemini-flash-lite-latest" })
+            if (!_fallbacks.Contains(alias)) _fallbacks.Add(alias);
+        _fallbacks = _fallbacks.Where(n => n != GeminiModel).Take(4).ToList();
+        logger.LogInformation("Yedek modeller: {Models}", string.Join(", ", _fallbacks));
         return _fallbacks;
     }
 
@@ -265,6 +272,7 @@ public class ChatService(HttpClient http, IConfiguration config, ILogger<ChatSer
         // Geçici hatalarda (429/503) kısa beklemelerle 3 kez dene.
         for (var attempt = 1; ; attempt++)
         {
+            double? retryAfterSeconds = null;
             using var request = await CloneAsync(template);
             HttpResponseMessage response;
             try
@@ -283,13 +291,21 @@ public class ChatService(HttpClient http, IConfiguration config, ILogger<ChatSer
                     return JsonDocument.Parse(raw);
 
                 var transient = (int)response.StatusCode is 429 or 503;
+                retryAfterSeconds = transient ? RetryDelay(raw) : null;
                 if (transient && attempt == 3)
                     throw new ProviderBusyException($"{provider} yoğun ({(int)response.StatusCode}): {raw}");
                 if (!transient)
                     throw new InvalidOperationException($"{provider} hatası ({(int)response.StatusCode}): {raw}");
             }
-            await Task.Delay(TimeSpan.FromSeconds(attempt * 2));
+            await Task.Delay(TimeSpan.FromSeconds(retryAfterSeconds ?? attempt * 2));
         }
+    }
+
+    /// <summary>Google 429 cevabındaki "retryDelay": "8s" değerini (en fazla 12 sn) okur.</summary>
+    private static double? RetryDelay(string raw)
+    {
+        var m = System.Text.RegularExpressions.Regex.Match(raw, "\"retryDelay\"\\s*:\\s*\"(\\d+(?:\\.\\d+)?)s\"");
+        return m.Success ? Math.Min(double.Parse(m.Groups[1].Value, CultureInfo.InvariantCulture) + 1, 12) : null;
     }
 
     private static async Task<HttpRequestMessage> CloneAsync(HttpRequestMessage src)

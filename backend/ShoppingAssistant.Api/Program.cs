@@ -87,6 +87,13 @@ app.MapPost("/api/chat", async (ChatRequest req, AppDbContext db, ChatService ch
     {
         return Results.Ok(await chat.AskAsync(req.Messages, db));
     }
+    catch (ProviderBusyException e)
+    {
+        app.Logger.LogWarning("Asistan yoğun: {Msg}", e.Message);
+        return Results.Problem(
+            app.Environment.IsDevelopment() ? e.Message : "Asistan şu an yoğun, birkaç saniye sonra tekrar dene.",
+            statusCode: 503);
+    }
     catch (Exception e)
     {
         app.Logger.LogError(e, "Chat isteği başarısız");
