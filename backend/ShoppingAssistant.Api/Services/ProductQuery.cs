@@ -10,7 +10,8 @@ public record ProductFilter(
     decimal? MinPrice = null,
     decimal? MaxPrice = null,
     bool InStockOnly = false,
-    string? Sort = null);
+    string? Sort = null,
+    IReadOnlyList<string>? ExcludeBrands = null);
 
 public static class ProductQuery
 {
@@ -20,6 +21,11 @@ public static class ProductQuery
             q = q.Where(p => p.Category == f.Category);
         if (!string.IsNullOrWhiteSpace(f.Brand))
             q = q.Where(p => EF.Functions.ILike(p.Brand, f.Brand));
+        foreach (var excluded in f.ExcludeBrands ?? [])
+        {
+            var b = excluded;
+            q = q.Where(p => !EF.Functions.ILike(p.Brand, b));
+        }
         if (f.MinPrice is { } min) q = q.Where(p => p.Price >= min);
         if (f.MaxPrice is { } max) q = q.Where(p => p.Price <= max);
         if (f.InStockOnly) q = q.Where(p => p.Stock > 0);
