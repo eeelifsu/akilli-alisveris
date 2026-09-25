@@ -159,8 +159,13 @@ static Gadgets360Source Gadgets360(IServiceProvider sp, string[] args)
 /// <summary>"postgresql://kullanici:sifre@host/db?sslmode=require" adresini Npgsql biçimine çevirir.</summary>
 static string NormalizeConnectionString(string value)
 {
-    if (!value.StartsWith("postgres://") && !value.StartsWith("postgresql://"))
+    // Panelden yapıştırırken gelen fazlalıkları temizle: boşluk, tırnak, "psql '...'" öneki.
+    value = value.Trim();
+    var schemeAt = value.IndexOf("postgresql://", StringComparison.Ordinal);
+    if (schemeAt < 0) schemeAt = value.IndexOf("postgres://", StringComparison.Ordinal);
+    if (schemeAt < 0)
         return value;
+    value = value[schemeAt..].TrimEnd('\'', '"', ' ', '\r', '\n');
     var uri = new Uri(value);
     var user = uri.UserInfo.Split(':', 2);
     return new Npgsql.NpgsqlConnectionStringBuilder
