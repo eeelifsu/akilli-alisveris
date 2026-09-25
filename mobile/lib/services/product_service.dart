@@ -17,10 +17,10 @@ class Facet {
 }
 
 class ProductService {
-  /// Farklı sunucu için: flutter run `--dart-define=API_URL=http://IP:PORT`
+  /// Varsayılan: canlı sunucu. Yerel sunucu için: flutter run `--dart-define=API_URL=http://IP:PORT`
   static const String baseUrl = String.fromEnvironment(
     'API_URL',
-    defaultValue: 'http://192.168.1.11:5065',
+    defaultValue: 'https://akilli-alisveris.onrender.com',
   );
 
   Future<dynamic> _get(String path, [Map<String, String>? query]) async {

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'cart.dart';
 import 'cart_page.dart';
@@ -146,24 +147,12 @@ class _ProductListPageState extends State<ProductListPage> {
 
   Widget _searchBox() {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
+      padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
       child: TextField(
         onChanged: _onQuery,
-        decoration: InputDecoration(
-          hintText: 'Mağazada ürün, marka ara…',
-          prefixIcon: const Icon(Icons.search),
-          filled: true,
-          fillColor: Colors.white,
-          isDense: true,
-          contentPadding: const EdgeInsets.symmetric(vertical: 14),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(999),
-            borderSide: const BorderSide(color: Color(0xFFE8E8EE)),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(999),
-            borderSide: const BorderSide(color: brand),
-          ),
+        decoration: pillInput(
+          hint: 'Mağazada ürün, marka ara…',
+          prefix: const Icon(Icons.search_rounded, color: muted),
         ),
       ),
     );
@@ -171,30 +160,25 @@ class _ProductListPageState extends State<ProductListPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Üst kısım koyu: durum çubuğu yazıları açık renk olsun.
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.light,
+      child: _scaffold(),
+    );
+  }
+
+  Widget _scaffold() {
     return Scaffold(
-      floatingActionButton: DecoratedBox(
-        decoration: BoxDecoration(
-          color: mint,
-          borderRadius: BorderRadius.circular(999),
-          boxShadow: [
-            BoxShadow(
-              color: mint.withValues(alpha: .45),
-              blurRadius: 18,
-              offset: const Offset(0, 8),
-            ),
-          ],
-        ),
-        child: TextButton.icon(
-          onPressed: _openChat,
-          style: TextButton.styleFrom(
-            foregroundColor: const Color(0xFF08281A),
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-          ),
-          icon: const Text('✨', style: TextStyle(fontSize: 18)),
-          label: const Text(
-            'Asistan',
-            style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
-          ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: _openChat,
+        backgroundColor: ink,
+        foregroundColor: bg,
+        elevation: 6,
+        shape: const StadiumBorder(),
+        icon: const Icon(Icons.auto_awesome_rounded, color: lime, size: 20),
+        label: const Text(
+          'Asistan',
+          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15.5),
         ),
       ),
       body: Column(
@@ -210,39 +194,41 @@ class _ProductListPageState extends State<ProductListPage> {
 
   Widget _filters() {
     return SizedBox(
-      height: 56,
+      height: 60,
       child: Row(
         children: [
           Expanded(
             child: ListView(
               scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.fromLTRB(16, 10, 0, 10),
+              padding: const EdgeInsets.fromLTRB(16, 12, 0, 10),
               children: [
                 for (final c in <Facet?>[null, ..._categories])
                   Padding(
                     padding: const EdgeInsets.only(right: 8),
-                    child: ChoiceChip(
-                      label: Text(
-                        c == null ? 'Tümü' : '${emojiFor(c.name)} ${c.name}',
-                      ),
-                      selected: _category == c?.name,
-                      showCheckmark: false,
-                      selectedColor: brand,
-                      labelStyle: TextStyle(
-                        color: _category == c?.name ? Colors.white : null,
-                        fontWeight: FontWeight.w600,
-                      ),
-                      shape: StadiumBorder(
-                        side: BorderSide(
-                          color: _category == c?.name
-                              ? brand
-                              : const Color(0xFFE6E8F0),
-                        ),
-                      ),
-                      backgroundColor: Colors.white,
-                      onSelected: (_) {
-                        _category = c?.name;
-                        _load();
+                    child: Builder(
+                      builder: (_) {
+                        final selected = _category == c?.name;
+                        return ChoiceChip(
+                          avatar: c == null
+                              ? null
+                              : Icon(
+                                  iconFor(c.name),
+                                  size: 17,
+                                  color: selected ? lime : muted,
+                                ),
+                          label: Text(c == null ? 'Tümü' : c.name),
+                          selected: selected,
+                          showCheckmark: false,
+                          labelStyle: TextStyle(
+                            color: selected ? bg : ink,
+                            fontWeight: FontWeight.w500,
+                          ),
+                          side: BorderSide(color: selected ? ink : line),
+                          onSelected: (_) {
+                            _category = c?.name;
+                            _load();
+                          },
+                        );
                       },
                     ),
                   ),
@@ -253,7 +239,7 @@ class _ProductListPageState extends State<ProductListPage> {
             tooltip: 'Sırala',
             icon: Icon(
               Icons.swap_vert_rounded,
-              color: _sort.isEmpty ? null : brand,
+              color: _sort.isEmpty ? muted : ink,
             ),
             initialValue: _sort,
             onSelected: (v) {
@@ -289,7 +275,14 @@ class _ProductListPageState extends State<ProductListPage> {
           ? ListView(
               children: const [
                 SizedBox(height: 80),
-                Center(child: Text('🔍 Ürün bulunamadı.')),
+                Icon(Icons.search_off_rounded, size: 40, color: muted),
+                SizedBox(height: 8),
+                Center(
+                  child: Text(
+                    'Aramana uygun ürün bulunamadı.',
+                    style: TextStyle(color: muted),
+                  ),
+                ),
               ],
             )
           : ListView.separated(
@@ -306,7 +299,10 @@ class _ProductListPageState extends State<ProductListPage> {
                           ? const CircularProgressIndicator()
                           : Text(
                               '$_total üründen ${_items.length} tanesi gösteriliyor',
-                              style: const TextStyle(color: Colors.black45),
+                              style: const TextStyle(
+                                color: muted,
+                                fontSize: 13,
+                              ),
                             ),
                     ),
                   );
@@ -353,13 +349,13 @@ class _HeaderState extends State<_Header> {
   Widget build(BuildContext context) {
     return Container(
       decoration: const BoxDecoration(
-        gradient: brandGradient,
+        color: ink,
         borderRadius: BorderRadius.vertical(bottom: Radius.circular(28)),
       ),
       child: SafeArea(
         bottom: false,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 8, 12, 18),
+          padding: const EdgeInsets.fromLTRB(20, 8, 12, 20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -367,17 +363,25 @@ class _HeaderState extends State<_Header> {
                 children: [
                   ClipRRect(
                     borderRadius: BorderRadius.circular(10),
-                    child: Image.asset('assets/logo.png', height: 38),
+                    child: Image.asset('assets/logo.png', height: 36),
                   ),
                   const SizedBox(width: 10),
-                  const Expanded(
-                    child: Text(
-                      'Akıllı Alışveriş',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 24,
-                        fontWeight: FontWeight.w800,
+                  Expanded(
+                    child: Text.rich(
+                      TextSpan(
+                        children: [
+                          const TextSpan(text: 'Akıllı '),
+                          TextSpan(
+                            text: 'Alışveriş',
+                            style: serif(
+                              24,
+                              color: bg,
+                              style: FontStyle.italic,
+                            ),
+                          ),
+                        ],
                       ),
+                      style: serif(24, color: bg),
                     ),
                   ),
                   ListenableBuilder(
@@ -388,38 +392,50 @@ class _HeaderState extends State<_Header> {
                       ),
                       icon: Badge(
                         isLabelVisible: cart.count > 0,
+                        backgroundColor: lime,
+                        textColor: ink,
                         label: Text('${cart.count}'),
                         child: const Icon(
-                          Icons.shopping_cart_outlined,
-                          color: Colors.white,
+                          Icons.shopping_bag_outlined,
+                          color: bg,
                         ),
                       ),
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 4),
-              const Text(
-                'Ne aradığını anlat,\nen uygununu birlikte bulalım.',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 20,
-                  height: 1.25,
-                  fontWeight: FontWeight.w700,
+              const SizedBox(height: 18),
+              Text.rich(
+                TextSpan(
+                  children: [
+                    const TextSpan(text: 'Doğru ürünü\n'),
+                    TextSpan(
+                      text: 'birlikte',
+                      style: serif(36, color: lime, style: FontStyle.italic),
+                    ),
+                    const TextSpan(text: ' bulalım.'),
+                  ],
                 ),
+                style: serif(36, color: bg),
               ),
-              const SizedBox(height: 14),
+              const SizedBox(height: 16),
               Padding(
                 padding: const EdgeInsets.only(right: 8),
                 child: TextField(
                   controller: _controller,
                   onSubmitted: _submit,
                   textInputAction: TextInputAction.send,
+                  style: const TextStyle(color: ink),
                   decoration: InputDecoration(
                     hintText: 'Örn: 50.000 TL altı laptop…',
+                    hintStyle: const TextStyle(color: muted),
                     prefixIcon: const Padding(
-                      padding: EdgeInsets.only(left: 14, right: 6),
-                      child: Text('✨', style: TextStyle(fontSize: 18)),
+                      padding: EdgeInsets.only(left: 16, right: 8),
+                      child: Icon(
+                        Icons.auto_awesome_outlined,
+                        size: 19,
+                        color: muted,
+                      ),
                     ),
                     prefixIconConstraints: const BoxConstraints(
                       minWidth: 0,
@@ -428,13 +444,16 @@ class _HeaderState extends State<_Header> {
                     suffixIcon: Padding(
                       padding: const EdgeInsets.all(5),
                       child: IconButton.filled(
-                        style: IconButton.styleFrom(backgroundColor: brand),
+                        style: IconButton.styleFrom(
+                          backgroundColor: lime,
+                          foregroundColor: ink,
+                        ),
                         onPressed: _submit,
                         icon: const Icon(Icons.arrow_forward_rounded, size: 20),
                       ),
                     ),
                     filled: true,
-                    fillColor: Colors.white,
+                    fillColor: surface,
                     isDense: true,
                     contentPadding: const EdgeInsets.symmetric(vertical: 16),
                     border: OutlineInputBorder(
@@ -444,7 +463,7 @@ class _HeaderState extends State<_Header> {
                   ),
                 ),
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 12),
               SizedBox(
                 height: 34,
                 child: ListView(
@@ -459,18 +478,17 @@ class _HeaderState extends State<_Header> {
                             alignment: Alignment.center,
                             padding: const EdgeInsets.symmetric(horizontal: 14),
                             decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: .2),
                               borderRadius: BorderRadius.circular(999),
                               border: Border.all(
-                                color: Colors.white.withValues(alpha: .45),
+                                color: bg.withValues(alpha: .28),
                               ),
                             ),
                             child: Text(
                               p,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 12.5,
-                                color: Colors.white,
-                                fontWeight: FontWeight.w600,
+                                color: bg.withValues(alpha: .85),
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
                           ),
@@ -501,7 +519,7 @@ class _ErrorView extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.cloud_off, size: 48),
+            const Icon(Icons.cloud_off_rounded, size: 44, color: muted),
             const SizedBox(height: 12),
             Text(
               'Sunucuya bağlanılamadı.\n$error',

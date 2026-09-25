@@ -25,38 +25,36 @@ class ProductVisual extends StatelessWidget {
     super.key,
     required this.product,
     this.height = 140,
-    this.emojiSize = 60,
+    this.iconSize = 56,
   });
 
   final Product product;
   final double height;
-  final double emojiSize;
+  final double iconSize;
 
   @override
   Widget build(BuildContext context) {
-    final emoji = Text(
-      emojiFor(product.category),
-      style: TextStyle(fontSize: emojiSize),
+    final fallback = Icon(
+      iconFor(product.category),
+      size: iconSize,
+      color: ink.withValues(alpha: .35),
     );
     return Container(
       height: height,
       width: double.infinity,
       alignment: Alignment.center,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: gradientFor(product.category),
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-      ),
+      color: visualBg,
       child: product.imageUrl == null
-          ? emoji
+          ? fallback
           : Padding(
               padding: EdgeInsets.all(height * 0.1),
               child: Image.network(
                 product.imageUrl!,
                 fit: BoxFit.contain,
-                errorBuilder: (_, _, _) => emoji,
+                // Beyaz ürün fotoğrafı zemini krem arka plana karışsın.
+                color: visualBg,
+                colorBlendMode: BlendMode.multiply,
+                errorBuilder: (_, _, _) => fallback,
                 frameBuilder: (_, child, frame, _) => AnimatedOpacity(
                   opacity: frame == null ? 0 : 1,
                   duration: const Duration(milliseconds: 250),
@@ -75,10 +73,10 @@ class StockTag extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final (label, bg, fg) = stock <= 0
-        ? ('Tükendi', const Color(0xFFFFE5E5), const Color(0xFFD43B3B))
+        ? ('Tükendi', const Color(0xFFF8E1DA), bad)
         : stock <= 10
-        ? ('Son $stock adet', const Color(0xFFFFF1D6), const Color(0xFF9A5B00))
-        : ('Stokta', Colors.white, const Color(0xFF14172B));
+        ? ('Son $stock adet', const Color(0xFFF8ECD3), const Color(0xFF8A5300))
+        : ('Stokta', surface, ink);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
@@ -87,7 +85,11 @@ class StockTag extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: fg),
+        style: TextStyle(
+          fontSize: 11.5,
+          fontWeight: FontWeight.w600,
+          color: fg,
+        ),
       ),
     );
   }
@@ -102,7 +104,7 @@ class RatingLabel extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        const Icon(Icons.star_rounded, size: 18, color: Color(0xFFE0A100)),
+        const Icon(Icons.star_rounded, size: 17, color: star),
         const SizedBox(width: 2),
         Text(
           '${product.rating!.toStringAsFixed(1)}'
@@ -110,7 +112,7 @@ class RatingLabel extends StatelessWidget {
           style: const TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w600,
-            color: Colors.black54,
+            color: muted,
           ),
         ),
       ],
@@ -125,7 +127,6 @@ class ProductCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final p = product;
     return Card(
       clipBehavior: Clip.antiAlias,
@@ -136,30 +137,40 @@ class ProductCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Stack(
-              children: [
-                ProductVisual(product: p),
-                Positioned(top: 12, left: 12, child: StockTag(p.stock)),
-              ],
+            Padding(
+              padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Stack(
+                  children: [
+                    ProductVisual(product: p, height: 190),
+                    Positioned(top: 10, left: 10, child: StockTag(p.stock)),
+                  ],
+                ),
+              ),
             ),
             Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     '${p.brand} · ${p.category}'.toUpperCase(),
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      color: Colors.black54,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: .6,
+                    style: const TextStyle(
+                      fontSize: 11,
+                      color: muted,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: .8,
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     p.name,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      height: 1.3,
+                      fontWeight: FontWeight.w600,
+                      color: ink,
                     ),
                   ),
                   if (p.rating != null) ...[
@@ -169,32 +180,24 @@ class ProductCard extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(
                     p.description,
-                    maxLines: 3,
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: Colors.black54,
+                    style: const TextStyle(
+                      fontSize: 13.5,
+                      color: muted,
+                      height: 1.4,
                     ),
                   ),
                   const SizedBox(height: 12),
+                  const DashedDivider(),
+                  const SizedBox(height: 12),
                   Row(
                     children: [
-                      Expanded(
-                        child: Text(
-                          tl(p.price),
-                          style: theme.textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                      ),
-                      FilledButton.tonal(
+                      Expanded(child: Text(tl(p.price), style: serif(26))),
+                      OutlinedButton(
                         onPressed: p.stock <= 0
                             ? null
                             : () => addToCart(context, p),
-                        style: FilledButton.styleFrom(
-                          minimumSize: const Size(0, 40),
-                          backgroundColor: const Color(0xFFEEECFF),
-                          foregroundColor: brand,
-                        ),
                         child: Text(p.stock <= 0 ? 'Tükendi' : 'Sepete ekle'),
                       ),
                     ],
@@ -205,6 +208,32 @@ class ProductCard extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// Kartlardaki kesik çizgili ayraç.
+class DashedDivider extends StatelessWidget {
+  const DashedDivider({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (_, c) {
+        final n = (c.maxWidth / 8).floor();
+        return Row(
+          children: List.generate(
+            n,
+            (_) => Expanded(
+              child: Container(
+                height: 1,
+                margin: const EdgeInsets.symmetric(horizontal: 2),
+                color: line,
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }

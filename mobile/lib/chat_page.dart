@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'models/product.dart';
 import 'product_detail_page.dart';
@@ -89,20 +90,60 @@ class _ChatPageState extends State<ChatPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        foregroundColor: Colors.white,
-        flexibleSpace: Container(
-          decoration: const BoxDecoration(gradient: brandGradient),
-        ),
-        title: const Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        backgroundColor: ink,
+        foregroundColor: bg,
+        systemOverlayStyle: SystemUiOverlayStyle.light,
+        titleTextStyle: const TextStyle(color: bg),
+        shape: const Border(),
+        titleSpacing: 0,
+        title: Row(
           children: [
-            Text(
-              'Alışveriş Asistanı',
-              style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700),
+            Container(
+              width: 36,
+              height: 36,
+              decoration: const BoxDecoration(
+                color: lime,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.auto_awesome_rounded,
+                size: 18,
+                color: ink,
+              ),
             ),
-            Text(
-              'Sana uygun ürünü bulalım',
-              style: TextStyle(fontSize: 12, color: Colors.white70),
+            const SizedBox(width: 12),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Alışveriş Asistanı',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: bg,
+                  ),
+                ),
+                Row(
+                  children: [
+                    Container(
+                      width: 6,
+                      height: 6,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFF5CB85C),
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      'Sana uygun ürünü bulalım',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: bg.withValues(alpha: .7),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ],
         ),
@@ -116,7 +157,7 @@ class _ChatPageState extends State<ChatPage> {
               children: [
                 _bubble(
                   false,
-                  'Merhaba! 👋 Bütçeni ve ne aradığını yaz, sana uygun ürünleri önereyim.',
+                  'Merhaba! Bütçeni ve ne aradığını yaz, sana uygun ürünleri önereyim.',
                 ),
                 for (final m in _messages) ..._messageWidgets(m),
                 if (!_loading &&
@@ -139,11 +180,10 @@ class _ChatPageState extends State<ChatPage> {
                     Padding(
                       padding: const EdgeInsets.only(right: 8),
                       child: ActionChip(
-                        label: Text(s),
-                        backgroundColor: Colors.white,
-                        shape: const StadiumBorder(
-                          side: BorderSide(color: Color(0xFFE6E8F0)),
-                        ),
+                        label: Text(s, style: const TextStyle(color: muted)),
+                        backgroundColor: surface,
+                        side: const BorderSide(color: line),
+                        shape: const StadiumBorder(),
                         onPressed: () => _send(s),
                       ),
                     ),
@@ -160,28 +200,15 @@ class _ChatPageState extends State<ChatPage> {
                       controller: _controller,
                       textInputAction: TextInputAction.send,
                       onSubmitted: (_) => _send(),
-                      decoration: InputDecoration(
-                        hintText: 'Mesajını yaz…',
-                        filled: true,
-                        fillColor: Colors.white,
-                        isDense: true,
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 18,
-                          vertical: 14,
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(999),
-                          borderSide: const BorderSide(
-                            color: Color(0xFFE6E8F0),
-                          ),
-                        ),
-                      ),
+                      decoration: pillInput(hint: 'Mesajını yaz…'),
                     ),
                   ),
                   const SizedBox(width: 8),
                   IconButton.filled(
                     style: IconButton.styleFrom(
-                      backgroundColor: brand,
+                      backgroundColor: lime,
+                      foregroundColor: ink,
+                      disabledBackgroundColor: line,
                       minimumSize: const Size(48, 48),
                     ),
                     onPressed: _loading ? null : _send,
@@ -207,13 +234,10 @@ class _ChatPageState extends State<ChatPage> {
             ActionChip(
               label: Text(
                 o,
-                style: const TextStyle(
-                  color: brand,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: const TextStyle(color: ink, fontWeight: FontWeight.w600),
               ),
-              backgroundColor: Colors.white,
-              side: const BorderSide(color: brand),
+              backgroundColor: surface,
+              side: const BorderSide(color: ink),
               shape: const StadiumBorder(),
               onPressed: () => _send(o),
             ),
@@ -240,25 +264,20 @@ class _ChatPageState extends State<ChatPage> {
           maxWidth: MediaQuery.of(context).size.width * 0.8,
         ),
         decoration: BoxDecoration(
-          color: error
-              ? const Color(0xFFFFE5E5)
-              : (isUser ? brand : Colors.white),
-          border: isUser || error
-              ? null
-              : Border.all(color: const Color(0xFFE6E8F0)),
+          color: error ? const Color(0xFFF8E1DA) : (isUser ? ink : surface),
+          border: isUser || error ? null : Border.all(color: line),
           borderRadius: BorderRadius.only(
-            topLeft: const Radius.circular(16),
-            topRight: const Radius.circular(16),
-            bottomLeft: Radius.circular(isUser ? 16 : 4),
-            bottomRight: Radius.circular(isUser ? 4 : 16),
+            topLeft: const Radius.circular(18),
+            topRight: const Radius.circular(18),
+            bottomLeft: Radius.circular(isUser ? 18 : 5),
+            bottomRight: Radius.circular(isUser ? 5 : 18),
           ),
         ),
         child: Text(
           text,
           style: TextStyle(
-            color: error
-                ? const Color(0xFFD43B3B)
-                : (isUser ? Colors.white : null),
+            height: 1.4,
+            color: error ? bad : (isUser ? bg : ink),
           ),
         ),
       ),
@@ -271,14 +290,19 @@ class _ChatPageState extends State<ChatPage> {
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE6E8F0)),
+        color: surface,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: line),
       ),
       child: const SizedBox(
         width: 36,
         height: 8,
-        child: LinearProgressIndicator(minHeight: 4),
+        child: LinearProgressIndicator(
+          minHeight: 4,
+          color: ink,
+          backgroundColor: line,
+          borderRadius: BorderRadius.all(Radius.circular(4)),
+        ),
       ),
     ),
   );
@@ -299,7 +323,7 @@ class _ChatPageState extends State<ChatPage> {
                 borderRadius: BorderRadius.circular(12),
                 child: SizedBox(
                   width: 56,
-                  child: ProductVisual(product: p, height: 56, emojiSize: 28),
+                  child: ProductVisual(product: p, height: 56, iconSize: 26),
                 ),
               ),
               const SizedBox(width: 12),
@@ -309,25 +333,23 @@ class _ChatPageState extends State<ChatPage> {
                   children: [
                     Text(
                       p.name,
-                      style: const TextStyle(fontWeight: FontWeight.w700),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                      ),
                     ),
                     Text(
                       '${tl(p.price)} · ${p.brand}',
-                      style: const TextStyle(
-                        color: Colors.black54,
-                        fontSize: 13,
-                      ),
+                      style: const TextStyle(color: muted, fontSize: 12.5),
                     ),
                   ],
                 ),
               ),
-              FilledButton.tonal(
+              OutlinedButton(
                 onPressed: p.stock <= 0 ? null : () => addToCart(context, p),
-                style: FilledButton.styleFrom(
-                  minimumSize: const Size(0, 36),
-                  backgroundColor: const Color(0xFFEEECFF),
-                  foregroundColor: brand,
-                ),
+                style: OutlinedButton.styleFrom(minimumSize: const Size(0, 34)),
                 child: const Text('Ekle'),
               ),
             ],

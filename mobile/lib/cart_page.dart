@@ -16,17 +16,30 @@ class CartPage extends StatelessWidget {
         builder: (context, _) {
           final lines = cart.lines;
           if (lines.isEmpty) {
-            return const Center(
+            return Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text('🛒', style: TextStyle(fontSize: 56)),
-                  SizedBox(height: 8),
-                  Text(
-                    'Sepetin boş',
-                    style: TextStyle(fontWeight: FontWeight.w700),
+                  Container(
+                    width: 80,
+                    height: 80,
+                    decoration: const BoxDecoration(
+                      color: bg2,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.shopping_bag_outlined,
+                      size: 34,
+                      color: ink,
+                    ),
                   ),
-                  Text('Beğendiğin ürünleri sepete ekle.'),
+                  const SizedBox(height: 14),
+                  Text('Sepetin boş', style: serif(26)),
+                  const SizedBox(height: 4),
+                  const Text(
+                    'Beğendiğin ürünleri sepete ekle.',
+                    style: TextStyle(color: muted),
+                  ),
                 ],
               ),
             );
@@ -52,7 +65,7 @@ class CartPage extends StatelessWidget {
                                 child: ProductVisual(
                                   product: l.product,
                                   height: 64,
-                                  emojiSize: 30,
+                                  iconSize: 28,
                                 ),
                               ),
                             ),
@@ -64,22 +77,18 @@ class CartPage extends StatelessWidget {
                                   Text(
                                     l.product.name,
                                     style: const TextStyle(
-                                      fontWeight: FontWeight.w700,
+                                      fontWeight: FontWeight.w600,
                                     ),
                                   ),
                                   Text(
                                     tl(l.product.price),
-                                    style: const TextStyle(
-                                      color: Colors.black54,
-                                    ),
+                                    style: const TextStyle(color: muted),
                                   ),
                                   Row(
                                     children: [
                                       IconButton(
                                         visualDensity: VisualDensity.compact,
-                                        icon: const Icon(
-                                          Icons.remove_circle_outline,
-                                        ),
+                                        icon: const Icon(Icons.remove_rounded),
                                         onPressed: () =>
                                             cart.setQty(l.product, l.qty - 1),
                                       ),
@@ -91,9 +100,7 @@ class CartPage extends StatelessWidget {
                                       ),
                                       IconButton(
                                         visualDensity: VisualDensity.compact,
-                                        icon: const Icon(
-                                          Icons.add_circle_outline,
-                                        ),
+                                        icon: const Icon(Icons.add_rounded),
                                         onPressed: () =>
                                             cart.setQty(l.product, l.qty + 1),
                                       ),
@@ -103,7 +110,10 @@ class CartPage extends StatelessWidget {
                               ),
                             ),
                             IconButton(
-                              icon: const Icon(Icons.delete_outline),
+                              icon: const Icon(
+                                Icons.delete_outline_rounded,
+                                color: muted,
+                              ),
                               onPressed: () => cart.setQty(l.product, 0),
                             ),
                           ],
@@ -117,8 +127,8 @@ class CartPage extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
                   decoration: const BoxDecoration(
-                    color: Colors.white,
-                    border: Border(top: BorderSide(color: Color(0xFFE6E8F0))),
+                    color: surface,
+                    border: Border(top: BorderSide(color: line)),
                   ),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
@@ -128,18 +138,9 @@ class CartPage extends StatelessWidget {
                         children: [
                           const Text(
                             'Toplam',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w600,
-                            ),
+                            style: TextStyle(fontSize: 15, color: muted),
                           ),
-                          Text(
-                            tl(cart.total),
-                            style: const TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
+                          Text(tl(cart.total), style: serif(34)),
                         ],
                       ),
                       const SizedBox(height: 12),
@@ -152,7 +153,17 @@ class CartPage extends StatelessWidget {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
                                 behavior: SnackBarBehavior.floating,
-                                content: Text('🎉 Siparişin alındı! (demo)'),
+                                content: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.check_circle_outline_rounded,
+                                      color: lime,
+                                      size: 20,
+                                    ),
+                                    SizedBox(width: 8),
+                                    Text('Siparişin alındı! (demo)'),
+                                  ],
+                                ),
                               ),
                             );
                           },
