@@ -15,18 +15,20 @@ builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(dataSou
 
 builder.Services.AddHttpClient<ChatService>(c => c.Timeout = TimeSpan.FromSeconds(120));
 builder.Services.AddHttpClient<DummyJsonSource>();
+builder.Services.AddScoped<Gadgets360Source>();
 builder.Services.AddScoped<ProductImporter>();
 builder.Services.AddCors(o => o.AddDefaultPolicy(p => p.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()));
 
 var app = builder.Build();
 
-// Kullanım: dotnet run --no-launch-profile -- import dummyjson [--purge]
+// Kullanım: dotnet run --no-launch-profile -- import <dummyjson|gadgets360> [klasör] [--purge]
 if (args.Length >= 2 && args[0] == "import")
 {
     using var scope = app.Services.CreateScope();
     IProductSource source = args[1] switch
     {
         "dummyjson" => scope.ServiceProvider.GetRequiredService<DummyJsonSource>(),
+        "gadgets360" => Gadgets360(scope.ServiceProvider, args),
         _ => throw new ArgumentException($"Bilinmeyen kaynak: {args[1]}"),
     };
     var (added, updated, removed) = await scope.ServiceProvider.GetRequiredService<ProductImporter>()
@@ -93,3 +95,10 @@ app.MapPost("/api/chat", async (ChatRequest req, AppDbContext db, ChatService ch
 });
 
 app.Run();
+
+static Gadgets360Source Gadgets360(IServiceProvider sp, string[] args)
+{
+    var source = sp.GetRequiredService<Gadgets360Source>();
+    source.Directory = args.Skip(2).FirstOrDefault(a => !a.StartsWith("--"));
+    return source;
+}

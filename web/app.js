@@ -1,7 +1,14 @@
 'use strict';
 
 const API = location.protocol === 'file:' ? 'http://localhost:5065' : '';
-const EMOJI = { Laptop: '💻', Telefon: '📱', Kulaklık: '🎧', Saat: '⌚', Tablet: '📲', Aksesuar: '🔌' };
+const EMOJI = {
+  Laptop: '💻', Telefon: '📱', Kulaklık: '🎧', Saat: '⌚', Tablet: '📲', Aksesuar: '🔌',
+  Televizyon: '📺', Hoparlör: '🔊', Kamera: '📷', 'Oyun Konsolu': '🎮',
+};
+const GRAD = {
+  Laptop: 'g-Laptop', Telefon: 'g-Telefon', Kulaklık: 'g-Kulaklık', Saat: 'g-Saat', Tablet: 'g-Tablet', Aksesuar: 'g-Aksesuar',
+  Televizyon: 'g-Televizyon', Hoparlör: 'g-Hoparlor', Kamera: 'g-Kamera', 'Oyun Konsolu': 'g-Konsol',
+};
 const PAGE_SIZE = 24;
 const $ = (id) => document.getElementById(id);
 
@@ -34,7 +41,7 @@ function loadCart() {
 
 const tl = (n) => new Intl.NumberFormat('tr-TR').format(n) + ' ₺';
 const emojiOf = (p) => EMOJI[p.category] ?? '🛍️';
-const gradOf = (p) => (EMOJI[p.category] ? `g-${p.category}` : 'g-default');
+const gradOf = (p) => GRAD[p.category] ?? 'g-default';
 const known = new Map(); // id -> ürün (listeden, sohbetten, sepetten görülenler)
 const remember = (list) => list.forEach((p) => known.set(p.id, p));
 const byId = (id) => known.get(id);

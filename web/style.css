@@ -249,3 +249,7 @@ select { height: 42px; padding: 0 12px; border-radius: 12px; border: 1px solid v
 .g-Aksesuar { background: linear-gradient(135deg, #dff3ff, #b6dcf5); }
 .src { margin: 0; font-size: 12px; color: var(--muted); }
 .card .desc { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.g-Televizyon { background: linear-gradient(135deg, #d9e8ff, #a9c8f5); }
+.g-Hoparlor { background: linear-gradient(135deg, #ffe3d4, #ffc3a3); }
+.g-Kamera { background: linear-gradient(135deg, #e3e3ea, #c2c3d1); }
+.g-Konsol { background: linear-gradient(135deg, #e0ffd9, #b5eaa9); }

@@ -37,6 +37,9 @@ public class Product
     /// </summary>
     public Dictionary<string, string> Specifications { get; set; } = new();
 
+    /// <summary>Ürünün çıkış yılı (biliniyorsa). Sıralamada yeni ürünler öne alınır.</summary>
+    public int? ReleaseYear { get; set; }
+
     /// <summary>Verinin geldiği kaynak: "seed", "dummyjson", "bestbuy" ...</summary>
     public string Source { get; set; } = "seed";
 

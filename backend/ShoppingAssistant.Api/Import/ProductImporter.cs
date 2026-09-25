@@ -19,7 +19,8 @@ public record ImportedProduct(
     Dictionary<string, string> Specifications,
     string? SourceUrl,
     decimal? OriginalPrice = null,
-    string? OriginalCurrency = null);
+    string? OriginalCurrency = null,
+    int? ReleaseYear = null);
 
 public interface IProductSource
 {
@@ -62,6 +63,7 @@ public class ProductImporter(AppDbContext db)
             p.Currency = "TRY";
             p.OriginalPrice = i.OriginalPrice;
             p.OriginalCurrency = i.OriginalCurrency;
+            p.ReleaseYear = i.ReleaseYear;
             p.SourceUrl = i.SourceUrl;
         }
 
