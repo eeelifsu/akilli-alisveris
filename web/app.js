@@ -195,7 +195,8 @@ function openModal(id) {
   v.id = 'm-visual';
   $('m-visual').replaceWith(v);
   $('m-name').textContent = p.name;
-  $('m-desc').textContent = [p.description, p.specs].filter(Boolean).join('\n\n');
+  const specLines = Object.entries(p.specifications ?? {}).map(([k, v]) => `${k}: ${v}`);
+  $('m-desc').textContent = [p.description, specLines.join('\n')].filter(Boolean).join('\n\n');
   $('m-price').textContent = tl(p.price);
   $('m-tags').replaceChildren(
     el('span', { class: 'tag' }, p.brand),

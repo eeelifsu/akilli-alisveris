@@ -171,7 +171,7 @@ public class ChatService(HttpClient http, IConfiguration config)
         ["stock"] = p.Stock,
         ["rating"] = p.Rating,
         ["description"] = p.Description,
-        ["specs"] = p.Specs,
+        ["specs"] = JsonSerializer.SerializeToNode(p.Specifications),
     }).ToArray());
 
     // ---------- Ollama (araç çağırma yok: önce ara, sonuçları isteme ekle) ----------

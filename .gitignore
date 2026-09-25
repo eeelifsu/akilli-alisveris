@@ -12,3 +12,9 @@ obj/
 # User-specific files
 *.user
 *.suo
+
+# Gizli bilgiler ve büyük veri dosyaları
+.env
+.env.*
+appsettings.*.local.json
+data/

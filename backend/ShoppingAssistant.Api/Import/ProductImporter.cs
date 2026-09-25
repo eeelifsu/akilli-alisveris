@@ -16,8 +16,10 @@ public record ImportedProduct(
     string? ImageUrl,
     double? Rating,
     int RatingCount,
-    string? Specs,
-    string? SourceUrl);
+    Dictionary<string, string> Specifications,
+    string? SourceUrl,
+    decimal? OriginalPrice = null,
+    string? OriginalCurrency = null);
 
 public interface IProductSource
 {
@@ -56,7 +58,10 @@ public class ProductImporter(AppDbContext db)
             p.ImageUrl = i.ImageUrl;
             p.Rating = i.Rating;
             p.RatingCount = i.RatingCount;
-            p.Specs = i.Specs;
+            p.Specifications = i.Specifications;
+            p.Currency = "TRY";
+            p.OriginalPrice = i.OriginalPrice;
+            p.OriginalCurrency = i.OriginalCurrency;
             p.SourceUrl = i.SourceUrl;
         }
 

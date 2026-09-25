@@ -6,10 +6,12 @@ using ShoppingAssistant.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(
-        builder.Configuration.GetConnectionString("DefaultConnection")
-    ));
+// Özellikler (Dictionary) jsonb olarak saklandığı için dinamik JSON açık olmalı.
+var dataSource = new Npgsql.NpgsqlDataSourceBuilder(
+        builder.Configuration.GetConnectionString("DefaultConnection"))
+    .EnableDynamicJson()
+    .Build();
+builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(dataSource));
 
 builder.Services.AddHttpClient<ChatService>(c => c.Timeout = TimeSpan.FromSeconds(120));
 builder.Services.AddHttpClient<DummyJsonSource>();

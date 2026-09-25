@@ -82,16 +82,20 @@ class ProductDetailPage extends StatelessWidget {
                       color: Colors.black54,
                     ),
                   ),
-                  if (p.specs != null) ...[
+                  if (p.specifications.isNotEmpty) ...[
                     const SizedBox(height: 16),
                     Text('Özellikler', style: theme.textTheme.titleMedium),
                     const SizedBox(height: 4),
-                    Text(
-                      p.specs!.replaceAll('; ', '\n'),
-                      style: theme.textTheme.bodyLarge?.copyWith(
-                        color: Colors.black54,
+                    for (final e in p.specifications.entries)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 2),
+                        child: Text(
+                          '${e.key}: ${e.value}',
+                          style: theme.textTheme.bodyLarge?.copyWith(
+                            color: Colors.black54,
+                          ),
+                        ),
                       ),
-                    ),
                   ],
                 ],
               ),

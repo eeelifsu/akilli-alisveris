@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using ShoppingAssistant.Api.Models;
 
 namespace ShoppingAssistant.Api.Import;
 
@@ -27,9 +28,9 @@ public class DummyJsonSource(HttpClient http, IConfiguration config) : IProductS
                 var title = p.GetProperty("title").GetString() ?? "";
                 var usd = p.GetProperty("price").GetDecimal();
                 var reviews = p.TryGetProperty("reviews", out var r) ? r.GetArrayLength() : 0;
-                var specs = new List<string>();
-                if (p.TryGetProperty("warrantyInformation", out var w)) specs.Add($"Garanti: {w.GetString()}");
-                if (p.TryGetProperty("shippingInformation", out var s)) specs.Add($"Kargo: {s.GetString()}");
+                var specs = new Dictionary<string, string>();
+                if (p.TryGetProperty("warrantyInformation", out var w) && w.GetString() is { } warranty)
+                    specs[SpecKeys.Warranty] = warranty;
 
                 result.Add(new ImportedProduct(
                     ExternalId: p.GetProperty("id").GetInt32().ToString(),
@@ -42,8 +43,10 @@ public class DummyJsonSource(HttpClient http, IConfiguration config) : IProductS
                     ImageUrl: p.TryGetProperty("thumbnail", out var t) ? t.GetString() : null,
                     Rating: p.TryGetProperty("rating", out var rt) ? rt.GetDouble() : null,
                     RatingCount: reviews,
-                    Specs: specs.Count > 0 ? string.Join("; ", specs) : null,
-                    SourceUrl: null));
+                    Specifications: specs,
+                    SourceUrl: null,
+                    OriginalPrice: usd,
+                    OriginalCurrency: "USD"));
             }
         }
         return result;

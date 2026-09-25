@@ -9,7 +9,7 @@ class Product {
   final String? imageUrl;
   final double? rating;
   final int ratingCount;
-  final String? specs;
+  final Map<String, String> specifications;
 
   Product({
     required this.id,
@@ -22,7 +22,7 @@ class Product {
     this.imageUrl,
     this.rating,
     this.ratingCount = 0,
-    this.specs,
+    this.specifications = const {},
   });
 
   factory Product.fromJson(Map<String, dynamic> json) {
@@ -37,7 +37,8 @@ class Product {
       imageUrl: json['imageUrl'],
       rating: (json['rating'] as num?)?.toDouble(),
       ratingCount: (json['ratingCount'] as num?)?.toInt() ?? 0,
-      specs: json['specs'],
+      specifications: (json['specifications'] as Map<String, dynamic>? ?? {})
+          .map((k, v) => MapEntry(k, '$v')),
     );
   }
 }
