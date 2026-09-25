@@ -1,8 +1,17 @@
 import 'package:flutter/material.dart';
 
-import 'main.dart' show ProductCard;
 import 'models/product.dart';
+import 'product_detail_page.dart';
 import 'services/chat_service.dart';
+import 'theme.dart';
+import 'widgets.dart';
+
+const _suggestions = [
+  'Öğrenciyim, 25 bin TL altı laptop öner',
+  'Uygun fiyatlı bir kulaklık arıyorum',
+  'Oyun için güçlü bir bilgisayar',
+  'Hediye için akıllı saat',
+];
 
 class ChatPage extends StatefulWidget {
   const ChatPage({super.key, required this.products});
@@ -40,8 +49,8 @@ class _ChatPageState extends State<ChatPage> {
     });
   }
 
-  Future<void> _send() async {
-    final text = _controller.text.trim();
+  Future<void> _send([String? preset]) async {
+    final text = (preset ?? _controller.text).trim();
     if (text.isEmpty || _loading) return;
     _controller.clear();
     setState(() {
@@ -52,11 +61,16 @@ class _ChatPageState extends State<ChatPage> {
     _scrollToEnd();
     try {
       final reply = await _service.send(_messages);
-      setState(() => _messages.add(reply));
+      if (mounted) setState(() => _messages.add(reply));
     } catch (e) {
-      setState(() => _error = e.toString());
+      if (mounted) {
+        setState(() {
+          _messages.removeLast(); // başarısız mesaj geçmişte kalmasın
+          _error = e.toString().replaceFirst('Exception: ', '');
+        });
+      }
     } finally {
-      setState(() => _loading = false);
+      if (mounted) setState(() => _loading = false);
       _scrollToEnd();
     }
   }
@@ -64,43 +78,67 @@ class _ChatPageState extends State<ChatPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Alışveriş Asistanı')),
+      appBar: AppBar(
+        foregroundColor: Colors.white,
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(gradient: brandGradient),
+        ),
+        title: const Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Alışveriş Asistanı',
+              style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700),
+            ),
+            Text(
+              'Sana uygun ürünü bulalım',
+              style: TextStyle(fontSize: 12, color: Colors.white70),
+            ),
+          ],
+        ),
+      ),
       body: Column(
         children: [
           Expanded(
-            child: _messages.isEmpty
-                ? const Center(
-                    child: Padding(
-                      padding: EdgeInsets.all(24),
-                      child: Text(
-                        'Ne arıyorsun? Örneğin: "Öğrenciyim, 25 bin TL altında laptop öner."',
-                        textAlign: TextAlign.center,
+            child: ListView(
+              controller: _scroll,
+              padding: const EdgeInsets.all(12),
+              children: [
+                _bubble(
+                  false,
+                  'Merhaba! 👋 Bütçeni ve ne aradığını yaz, sana uygun ürünleri önereyim.',
+                ),
+                for (final m in _messages) ..._messageWidgets(m),
+                if (_loading) _typing(),
+                if (_error != null) _bubble(false, '$_error', error: true),
+              ],
+            ),
+          ),
+          if (_messages.isEmpty)
+            SizedBox(
+              height: 44,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                children: [
+                  for (final s in _suggestions)
+                    Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: ActionChip(
+                        label: Text(s),
+                        backgroundColor: Colors.white,
+                        shape: const StadiumBorder(
+                          side: BorderSide(color: Color(0xFFE6E8F0)),
+                        ),
+                        onPressed: () => _send(s),
                       ),
                     ),
-                  )
-                : ListView.builder(
-                    controller: _scroll,
-                    padding: const EdgeInsets.all(12),
-                    itemCount: _messages.length,
-                    itemBuilder: (context, i) => _bubble(_messages[i]),
-                  ),
-          ),
-          if (_loading)
-            const Padding(
-              padding: EdgeInsets.all(8),
-              child: Text('Asistan yazıyor...'),
-            ),
-          if (_error != null)
-            Padding(
-              padding: const EdgeInsets.all(8),
-              child: Text(
-                _error!,
-                style: TextStyle(color: Theme.of(context).colorScheme.error),
+                ],
               ),
             ),
           SafeArea(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(12, 4, 12, 8),
+              padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
               child: Row(
                 children: [
                   Expanded(
@@ -108,17 +146,32 @@ class _ChatPageState extends State<ChatPage> {
                       controller: _controller,
                       textInputAction: TextInputAction.send,
                       onSubmitted: (_) => _send(),
-                      decoration: const InputDecoration(
-                        hintText: 'Mesajını yaz...',
-                        border: OutlineInputBorder(),
+                      decoration: InputDecoration(
+                        hintText: 'Mesajını yaz…',
+                        filled: true,
+                        fillColor: Colors.white,
                         isDense: true,
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 18,
+                          vertical: 14,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(999),
+                          borderSide: const BorderSide(
+                            color: Color(0xFFE6E8F0),
+                          ),
+                        ),
                       ),
                     ),
                   ),
                   const SizedBox(width: 8),
                   IconButton.filled(
+                    style: IconButton.styleFrom(
+                      backgroundColor: brand,
+                      minimumSize: const Size(48, 48),
+                    ),
                     onPressed: _loading ? null : _send,
-                    icon: const Icon(Icons.send),
+                    icon: const Icon(Icons.send_rounded),
                   ),
                 ],
               ),
@@ -129,33 +182,121 @@ class _ChatPageState extends State<ChatPage> {
     );
   }
 
-  Widget _bubble(ChatMessage m) {
-    final theme = Theme.of(context);
+  List<Widget> _messageWidgets(ChatMessage m) {
     final isUser = m.role == 'user';
     final suggested = widget.products
         .where((p) => m.productIds.contains(p.id))
         .toList();
-    return Column(
-      crossAxisAlignment: isUser
-          ? CrossAxisAlignment.end
-          : CrossAxisAlignment.start,
-      children: [
-        Container(
-          margin: const EdgeInsets.only(bottom: 8),
-          padding: const EdgeInsets.all(12),
-          constraints: BoxConstraints(
-            maxWidth: MediaQuery.of(context).size.width * 0.8,
-          ),
-          decoration: BoxDecoration(
-            color: isUser
-                ? theme.colorScheme.primaryContainer
-                : theme.colorScheme.surfaceContainerHighest,
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Text(m.content),
+    return [
+      _bubble(isUser, m.content),
+      for (final p in suggested) _recommendation(p),
+    ];
+  }
+
+  Widget _bubble(bool isUser, String text, {bool error = false}) {
+    return Align(
+      alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        constraints: BoxConstraints(
+          maxWidth: MediaQuery.of(context).size.width * 0.8,
         ),
-        for (final p in suggested) ProductCard(product: p),
-      ],
+        decoration: BoxDecoration(
+          color: error
+              ? const Color(0xFFFFE5E5)
+              : (isUser ? brand : Colors.white),
+          border: isUser || error
+              ? null
+              : Border.all(color: const Color(0xFFE6E8F0)),
+          borderRadius: BorderRadius.only(
+            topLeft: const Radius.circular(16),
+            topRight: const Radius.circular(16),
+            bottomLeft: Radius.circular(isUser ? 16 : 4),
+            bottomRight: Radius.circular(isUser ? 4 : 16),
+          ),
+        ),
+        child: Text(
+          text,
+          style: TextStyle(
+            color: error
+                ? const Color(0xFFD43B3B)
+                : (isUser ? Colors.white : null),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _typing() => Align(
+    alignment: Alignment.centerLeft,
+    child: Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFE6E8F0)),
+      ),
+      child: const SizedBox(
+        width: 36,
+        height: 8,
+        child: LinearProgressIndicator(minHeight: 4),
+      ),
+    ),
+  );
+
+  Widget _recommendation(Product p) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 8),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(18),
+        onTap: () => Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => ProductDetailPage(product: p)),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(10),
+          child: Row(
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: SizedBox(
+                  width: 56,
+                  child: ProductVisual(product: p, height: 56, emojiSize: 28),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      p.name,
+                      style: const TextStyle(fontWeight: FontWeight.w700),
+                    ),
+                    Text(
+                      '${tl(p.price)} · ${p.brand}',
+                      style: const TextStyle(
+                        color: Colors.black54,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              FilledButton.tonal(
+                onPressed: p.stock <= 0 ? null : () => addToCart(context, p),
+                style: FilledButton.styleFrom(
+                  minimumSize: const Size(0, 36),
+                  backgroundColor: const Color(0xFFEEECFF),
+                  foregroundColor: brand,
+                ),
+                child: const Text('Ekle'),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

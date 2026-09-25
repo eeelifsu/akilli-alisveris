@@ -101,25 +101,43 @@ public class ChatService(HttpClient http, IConfiguration config)
     private static StringContent Json(object body) =>
         new(JsonSerializer.Serialize(body), Encoding.UTF8, "application/json");
 
-    private async Task<JsonDocument> SendAsync(HttpRequestMessage request, string provider)
+    private async Task<JsonDocument> SendAsync(HttpRequestMessage template, string provider)
     {
-        HttpResponseMessage response;
-        try
+        // Geçici hatalarda (429/503) kısa beklemelerle 3 kez dene.
+        for (var attempt = 1; ; attempt++)
         {
-            response = await http.SendAsync(request);
-        }
-        catch (HttpRequestException e)
-        {
-            throw new InvalidOperationException($"{provider}'a bağlanılamadı: {e.Message}", e);
-        }
+            using var request = await CloneAsync(template);
+            HttpResponseMessage response;
+            try
+            {
+                response = await http.SendAsync(request);
+            }
+            catch (HttpRequestException e)
+            {
+                throw new InvalidOperationException($"{provider}'a bağlanılamadı: {e.Message}", e);
+            }
 
-        using (response)
-        {
-            var raw = await response.Content.ReadAsStringAsync();
-            if (!response.IsSuccessStatusCode)
-                throw new InvalidOperationException($"{provider} hatası ({(int)response.StatusCode}): {raw}");
-            return JsonDocument.Parse(raw);
+            using (response)
+            {
+                var raw = await response.Content.ReadAsStringAsync();
+                if (response.IsSuccessStatusCode)
+                    return JsonDocument.Parse(raw);
+
+                var transient = (int)response.StatusCode is 429 or 503;
+                if (!transient || attempt == 3)
+                    throw new InvalidOperationException($"{provider} hatası ({(int)response.StatusCode}): {raw}");
+            }
+            await Task.Delay(TimeSpan.FromSeconds(attempt * 2));
         }
+    }
+
+    private static async Task<HttpRequestMessage> CloneAsync(HttpRequestMessage src)
+    {
+        var copy = new HttpRequestMessage(src.Method, src.RequestUri);
+        foreach (var h in src.Headers) copy.Headers.TryAddWithoutValidation(h.Key, h.Value);
+        if (src.Content != null)
+            copy.Content = new StringContent(await src.Content.ReadAsStringAsync(), Encoding.UTF8, "application/json");
+        return copy;
     }
 
     private static ChatResponse Parse(string text, List<Product> products)

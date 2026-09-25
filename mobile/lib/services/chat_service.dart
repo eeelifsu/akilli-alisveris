@@ -30,11 +30,8 @@ class ChatService {
         .timeout(const Duration(seconds: 120));
 
     if (response.statusCode != 200) {
-      final detail =
-          (jsonDecode(utf8.decode(response.bodyBytes))
-              as Map<String, dynamic>)['detail'];
       throw Exception(
-        'Asistan cevap veremedi (${response.statusCode}): $detail',
+        'Asistan şu an cevap veremiyor (${response.statusCode}). Biraz sonra tekrar dene.',
       );
     }
 
