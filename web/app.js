@@ -1,10 +1,20 @@
 'use strict';
 
 const API = location.protocol === 'file:' ? 'http://localhost:5065' : '';
-const EMOJI = {
-  Laptop: '💻', Telefon: '📱', Kulaklık: '🎧', Saat: '⌚', Tablet: '📲', Aksesuar: '🔌',
-  Televizyon: '📺', Hoparlör: '🔊', Kamera: '📷', 'Oyun Konsolu': '🎮',
+const ICON = {
+  Laptop: 'laptop', Telefon: 'phone', Kulaklık: 'headphones', Saat: 'watch', Tablet: 'tablet', Aksesuar: 'plug',
+  Televizyon: 'tv', Hoparlör: 'speaker', Kamera: 'camera', 'Oyun Konsolu': 'gamepad',
 };
+/** SVG ikon (index.html'deki sprite'tan). */
+function icon(name) {
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('class', 'ic');
+  svg.setAttribute('aria-hidden', 'true');
+  const use = document.createElementNS('http://www.w3.org/2000/svg', 'use');
+  use.setAttribute('href', '#i-' + name);
+  svg.append(use);
+  return svg;
+}
 const GRAD = {
   Laptop: 'g-Laptop', Telefon: 'g-Telefon', Kulaklık: 'g-Kulaklık', Saat: 'g-Saat', Tablet: 'g-Tablet', Aksesuar: 'g-Aksesuar',
   Televizyon: 'g-Televizyon', Hoparlör: 'g-Hoparlor', Kamera: 'g-Kamera', 'Oyun Konsolu': 'g-Konsol',
@@ -40,7 +50,7 @@ function loadCart() {
 }
 
 const tl = (n) => new Intl.NumberFormat('tr-TR').format(n) + ' ₺';
-const emojiOf = (p) => EMOJI[p.category] ?? '🛍️';
+const iconOf = (p) => icon(ICON[p.category] ?? 'bag');
 const gradOf = (p) => GRAD[p.category] ?? 'g-default';
 const known = new Map(); // id -> ürün (listeden, sohbetten, sepetten görülenler)
 const remember = (list) => list.forEach((p) => known.set(p.id, p));
@@ -48,7 +58,7 @@ const byId = (id) => known.get(id);
 
 function visual(p, cls) {
   const box = el('div', { class: cls });
-  box.append(el('span', { class: 'emoji' }, emojiOf(p)));
+  box.append(el('span', { class: 'emoji' }, iconOf(p)));
   if (p.imageUrl) {
     const img = el('img', { src: p.imageUrl, alt: p.name, loading: 'lazy', referrerpolicy: 'no-referrer' });
     img.addEventListener('load', () => box.querySelector('.emoji')?.remove());
@@ -70,9 +80,9 @@ function el(tag, props = {}, ...children) {
 }
 
 let toastTimer;
-function toast(msg) {
+function toast(msg, iconName) {
   const t = $('toast');
-  t.textContent = msg;
+  t.replaceChildren(...(iconName ? [icon(iconName)] : []), msg);
   t.classList.add('show');
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
@@ -130,7 +140,7 @@ async function fetchProducts({ append = false } = {}) {
     $('result-info').textContent = '';
     $('more').hidden = true;
     $('state').replaceChildren(
-      el('div', {}, '😕 Ürünler yüklenemedi.'),
+      el('div', { class: 'state-msg' }, icon('alert'), 'Ürünler yüklenemedi.'),
       el('div', { class: 'small' }, String(e.message || e)),
       el('button', { class: 'btn ghost retry', onclick: () => fetchProducts() }, 'Tekrar dene'),
     );
@@ -144,14 +154,14 @@ function refetchSoon() {
 }
 
 function renderChips() {
-  const make = (label, value) =>
+  const make = (label, value, iconName) =>
     el('button', {
       class: 'chip', role: 'tab', 'aria-selected': String(state.category === value),
       onclick: () => { state.category = value; renderChips(); fetchProducts(); },
-    }, label);
+    }, iconName ? icon(iconName) : null, label);
   $('chips').replaceChildren(
     make('Tümü', null),
-    ...state.facets.categories.map((c) => make(`${EMOJI[c.name] ?? '🛍️'} ${c.name} (${c.count})`, c.name)),
+    ...state.facets.categories.map((c) => make(`${c.name} (${c.count})`, c.name, ICON[c.name] ?? 'bag')),
   );
 }
 
@@ -163,13 +173,13 @@ function stockTag(p) {
 
 function ratingEl(p) {
   if (!p.rating) return null;
-  return el('span', { class: 'rating' }, el('b', {}, '★'), p.rating.toFixed(1), p.ratingCount ? ` (${p.ratingCount})` : '');
+  return el('span', { class: 'rating' }, el('b', {}, icon('star')), p.rating.toFixed(1), p.ratingCount ? ` (${p.ratingCount})` : '');
 }
 
 function renderGrid(appendedCount = 0) {
   const list = state.products;
   $('result-info').textContent = `${state.total} ürün bulundu`;
-  $('state').replaceChildren(list.length ? '' : el('div', {}, '🔍 Aramana uygun ürün bulunamadı.'));
+  $('state').replaceChildren(list.length ? '' : el('div', { class: 'state-msg' }, icon('search'), 'Aramana uygun ürün bulunamadı.'));
   $('more').hidden = list.length >= state.total;
   const cards = list.map((p, i) => {
     const vis = visual(p, `visual ${gradOf(p)}`);
@@ -256,7 +266,7 @@ function renderCart() {
   $('cart-count').textContent = count;
 
   if (!entries.length) {
-    $('cart-items').replaceChildren(el('div', { class: 'empty' }, el('span', {}, '🛒'), el('strong', {}, 'Sepetin boş'), el('small', {}, 'Beğendiğin ürünleri sepete ekle.')));
+    $('cart-items').replaceChildren(el('div', { class: 'empty' }, el('span', {}, icon('cart')), el('strong', {}, 'Sepetin boş'), el('small', {}, 'Beğendiğin ürünleri sepete ekle.')));
     $('cart-foot').replaceChildren();
     return;
   }
@@ -272,7 +282,7 @@ function renderCart() {
           el('button', { 'aria-label': 'Artır', onclick: () => setQty(p.id, qty + 1) }, '+'),
         ),
       ),
-      el('button', { class: 'remove', 'aria-label': `${p.name} ürününü kaldır`, onclick: () => setQty(p.id, 0) }, '🗑'),
+      el('button', { class: 'remove', 'aria-label': `${p.name} ürününü kaldır`, onclick: () => setQty(p.id, 0) }, icon('trash')),
     ),
   ));
   $('cart-foot').replaceChildren(
@@ -286,7 +296,7 @@ function checkout() {
   state.cart = {};
   persistCart();
   closeDrawer();
-  toast('🎉 Siparişin alındı! (demo)');
+  toast('Siparişin alındı! (demo)', 'check');
 }
 
 function openDrawer() {
@@ -312,7 +322,7 @@ function openChat() {
   $('chat').hidden = false;
   $('chat-fab').hidden = true;
   if (!$('chat-body').children.length) {
-    botMessage('Merhaba! 👋 Bütçeni ve ne aradığını yaz, sana uygun ürünleri önereyim.');
+    botMessage('Merhaba! Bütçeni ve ne aradığını yaz, sana uygun ürünleri önereyim.');
     $('suggestions').replaceChildren(...SUGGESTIONS.map((s) =>
       el('button', { type: 'button', onclick: () => sendChat(s) }, s)));
   }

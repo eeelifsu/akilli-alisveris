@@ -53,7 +53,7 @@ public class ChatService(HttpClient http, IConfiguration config, ILogger<ChatSer
             return new(StorePolicies.Answer(intent.PolicyTopic), [], ["İade süresi kaç gün?", "Garanti var mı?", "Ürün öner"]);
 
         if (intent.IsGreeting && !intent.HasSignal)
-            return new("Merhaba! 👋 Ben alışveriş asistanınım. Ne aradığını ve bütçeni yaz, sana uygun ürünleri bulayım.",
+            return new("Merhaba! Ben alışveriş asistanınım. Ne aradığını ve bütçeni yaz, sana uygun ürünleri bulayım.",
                 [], [.. Greetings]);
 
         if (!intent.HasSignal)
