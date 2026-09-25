@@ -164,7 +164,13 @@ static string NormalizeConnectionString(string value)
     var schemeAt = value.IndexOf("postgresql://", StringComparison.Ordinal);
     if (schemeAt < 0) schemeAt = value.IndexOf("postgres://", StringComparison.Ordinal);
     if (schemeAt < 0)
-        return value;
+    {
+        // Npgsql biçimi ("Host=...;Database=...") olabilir; değilse anlaşılır bir hata ver (parolayı sızdırmadan).
+        if (value.Contains('=') && value.Contains(';')) return value;
+        throw new InvalidOperationException(
+            "DATABASE_CONNECTION_STRING geçersiz: 'postgresql://' ile başlayan Neon adresi bekleniyor. " +
+            $"Değer {value.Length} karakter, ilk 4 karakteri: '{(value.Length > 4 ? value[..4] : value)}'.");
+    }
     value = value[schemeAt..].TrimEnd('\'', '"', ' ', '\r', '\n');
     var uri = new Uri(value);
     var user = uri.UserInfo.Split(':', 2);
